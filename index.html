@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pasa Andoain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Diseño: cuaderno de campo meteorológico. Tabla de la semana arriba (días x especies),
+   detalle del criterio debajo. Números en condensada, texto en Barlow. */
+:root{
+  --bg:#eceff0; --surf:#f8f9f8; --ink:#1a2628; --muted:#58696b; --line:#cdd6d6;
+  --acc:#2c5a6d; --alta:#2e7a4d; --media:#b0741a; --baja:#8a9696; --on:#fff; --bon:#fff;
+  --f-num:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-txt:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1618; --surf:#172124; --ink:#e3ebea; --muted:#93a5a6; --line:#2a393c;
+  --acc:#7fb3c7; --alta:#3f9a66; --media:#c9892a; --baja:#6f7f80; --bon:#0b1416; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1618; --surf:#172124; --ink:#e3ebea; --muted:#93a5a6; --line:#2a393c;
+  --acc:#7fb3c7; --alta:#3f9a66; --media:#c9892a; --baja:#6f7f80; --bon:#0b1416; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--f-txt);
+  padding:max(12px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom));
+  max-width:760px;margin-inline:auto}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-block:8px 14px}
+h1{font:700 30px/1 var(--f-num);letter-spacing:.02em;text-transform:uppercase;margin:0}
+.sub{color:var(--muted);font-size:13px;margin-top:4px}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{background:var(--acc);color:var(--bon);border:0;border-radius:6px;padding:9px 14px;font-weight:600}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;
+  font:600 17px var(--f-num);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.mejor{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:14px}
+.mejor b{font:600 20px var(--f-num);letter-spacing:.02em}
+.wrap{overflow-x:auto}
+table{border-collapse:separate;border-spacing:4px;width:100%;text-align:center}
+th{font:600 15px var(--f-num);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:2px 4px}
+th.d{text-align:left;white-space:nowrap;color:var(--ink)}
+th small{display:block;font:400 11px var(--f-txt);text-transform:none;letter-spacing:0}
+td{padding:0}
+.c{width:100%;border:2px solid transparent;border-radius:6px;padding:6px 2px;min-height:58px;
+  background:var(--surf);color:var(--baja);line-height:1.05}
+.c .n{display:block;font:700 26px var(--f-num)}
+.c .l{display:block;font:600 11px var(--f-num);letter-spacing:.08em}
+.c .p{display:block;font:400 11px var(--f-txt);opacity:.9;margin-top:2px}
+.c.alta{background:var(--alta);color:var(--on)} .c.media{background:var(--media);color:var(--on)}
+.c.baja{border-color:var(--line)}
+.c[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.na{color:var(--baja)}
+.det{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:14px}
+.det h2{font:600 22px var(--f-num);letter-spacing:.03em;text-transform:uppercase;margin:0 0 4px}
+.det .nota{color:var(--muted);font-size:14px;margin:6px 0 10px}
+ul.cr{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+ul.cr li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:start;font-size:15px}
+ul.cr .m{font:700 18px var(--f-num)} ul.cr .si{color:var(--alta)} ul.cr .no{color:var(--baja)}
+ul.cr .pt{font:600 15px var(--f-num);color:var(--muted);white-space:nowrap}
+.par{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:14px}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.links a{color:var(--acc);font-weight:600}
+.msg{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--surf)}
+.pie{color:var(--muted);font-size:13px;margin-top:18px}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:10px 0 0}
+.leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+td.t{font-variant-numeric:tabular-nums}
+.ref td,.ref th{padding:6px 3px;text-align:right;border-bottom:1px solid var(--line)}
+.ref table{border-spacing:0;font-size:14px}
+.ref td:first-child,.ref th:first-child{text-align:left}
+.sp{font:600 13px var(--f-num);letter-spacing:.05em;text-transform:uppercase;color:var(--acc)}
+.dn{color:var(--media)} .up{color:var(--alta)}
+@media (prefers-reduced-motion:no-preference){.c{transition:box-shadow .12s,border-color .12s}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Pasa Andoain</h1><div class="sub" id="estado">Cargando previsión…</div></div>
+  <button class="btn" id="act" type="button">Actualizar</button>
+</header>
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t1" aria-selected="true" data-v="prev">Previsión</button>
+  <button class="tab" role="tab" id="t2" aria-selected="false" data-v="ref">Tus 14 días</button>
+</div>
+<main id="prev"></main>
+<main id="ref" hidden></main>
+<p class="pie">Datos de Open-Meteo (Landas, Burdeos, Poitiers, Urrugne, Andoain). Las reglas salen de tus 14 días de gran pase y de la bibliografía; son orientativas. Las previsiones a 3 días o más fallan más.</p>
+
+<script>
+/* ===== NUCLEO: reglas de pasa (equivale a alerta_pasa.py) ===== */
+const LUGARES = {landas:[43.89,-0.50], burdeos:[44.83,-0.70], poitiers:[46.58,0.34],
+                 urrugne:[43.37,-1.70], andoain:[43.22,-2.02]};
+const VARS = ["pressure_msl","temperature_2m","cloud_cover","wind_speed_10m","wind_direction_10m","precipitation","wind_gusts_10m"];
+const ESPECIES = ["paloma","becada","malviz"];
+const NOMBRE = {paloma:"Paloma", becada:"Becada", malviz:"Malviz/zorzal"};
+const UMBRAL = {alta:75, media:55, parecido:70};
+const HORA = 3600000, DIA = 86400000;
+const ROSA = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSO","SO","OSO","O","ONO","NO","NNO"];
+const rosa = g => ROSA[Math.round(g/22.5) % 16];
+const rad = x => x*Math.PI/180;
+const enSector = (a,lo,hi) => (((a-lo)%360+360)%360) <= (((hi-lo)%360+360)%360);
+const media = xs => { xs = xs.filter(x => x != null); return xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null; };
+const f0 = x => x.toFixed(0), f1 = x => x.toFixed(1);
+const sg1 = x => (x>=0?"+":"") + x.toFixed(1);
+const hh = (dia, hora) => dia + hora*HORA;               // dia = ms (UTC naive) de las 00:00
+const enCal = (dia, ini, fin) => { const d = new Date(dia), k = (d.getUTCMonth()+1)*100 + d.getUTCDate();
+  return k >= ini[0]*100+ini[1] && k <= fin[0]*100+fin[1]; };
+
+function dirVect(vel, ang) {
+  let sx = 0, sy = 0;
+  vel.forEach((v,i) => { const a = ang[i]; if (v == null || a == null) return;
+    sx += v*Math.sin(rad(a)); sy += v*Math.cos(rad(a)); });
+  if (sx === 0 && sy === 0) return null;
+  return (Math.atan2(sx, sy)*180/Math.PI + 360) % 360;
+}
+function dirComb(sa, sb) {
+  let sx = 0, sy = 0;
+  [sa, sb].forEach(s => { sx += s.viento*Math.sin(rad(s.dir)); sy += s.viento*Math.cos(rad(s.dir)); });
+  if (sx === 0 && sy === 0) return sa.dir;
+  return (Math.atan2(sx, sy)*180/Math.PI + 360) % 360;
+}
+function construir(t, cols) {
+  const D = {t, pos: new Map(t.map((x,i) => [x,i]))};
+  VARS.forEach(v => { if (cols[v]) D[v] = cols[v]; });
+  return D;
+}
+function estadisticas(D, a, b) {
+  const ii = []; D.t.forEach((t,i) => { if (t >= a && t <= b) ii.push(i); });
+  if (ii.length < 4) return null;
+  const g = v => ii.map(i => D[v][i]);
+  const vel = g("wind_speed_10m"), ang = g("wind_direction_10m");
+  const s = {presion: media(g("pressure_msl")), temp: media(g("temperature_2m")),
+    nubes: media(g("cloud_cover")), viento: media(vel), dir: dirVect(vel, ang), lluvia: null, racha: null};
+  if (D.precipitation) { const ll = g("precipitation").filter(x => x != null);
+    if (ll.length) s.lluvia = ll.reduce((p,c)=>p+c,0); }
+  if (D.wind_gusts_10m) { const rr = g("wind_gusts_10m").filter(x => x != null);
+    if (rr.length) s.racha = Math.max(...rr); }
+  if (["presion","temp","nubes","viento","dir"].some(k => s[k] == null)) return null;
+  return s;
+}
+function valor(D, v, t) { const i = D.pos.get(t); return i === undefined ? null : D[v][i]; }
+function cambio24(D, v, fin) {
+  const a = valor(D, v, fin-24*HORA), b = valor(D, v, fin);
+  return (a == null || b == null) ? null : b - a;
+}
+function sumaLluvia(...st) { const v = st.map(s => s.lluvia).filter(x => x != null);
+  return v.length ? v.reduce((p,c)=>p+c,0) : null; }
+function crit(texto, ok, max, pts) { return {texto, ok, max, pts: pts == null ? (ok ? max : 0) : pts}; }
+function maxRacha(U, A) { const r = [U.racha, A.racha].filter(x => x != null); return r.length ? Math.max(...r) : null; }
+function cerrar(c, resumen, nota, limiteCal, claveOk) {
+  let total = c.reduce((p,x) => p + x.pts, 0);
+  const fuera = limiteCal === false || (nota && nota.startsWith("Fuera"));
+  if (fuera) total = Math.min(total, 40);
+  if (claveOk === false) total = Math.min(total, 50);
+  return {puntos: Math.round(total), criterios: c, resumen, nota};
+}
+function todos(P, ks, a, b) {
+  const S = {};
+  for (const k of ks) { S[k] = estadisticas(P[k], a, b); if (!S[k]) return null; }
+  return S;
+}
+
+function evalPaloma(P, dia) {
+  const a = hh(dia,7), b = hh(dia,13);
+  const S = todos(P, ["landas","urrugne","andoain"], a, b); if (!S) return null;
+  const L = S.landas, U = S.urrugne, A = S.andoain;
+  const dE = dirComb(U, A), vE = (U.viento + A.viento)/2, rE = maxRacha(U, A);
+  const txtR = rE == null ? "" : `, rachas hasta ${f0(rE)}`;
+  const fOk = vE <= 20 && (rE == null || rE <= 40), fMed = vE <= 28 && (rE == null || rE <= 50);
+  const p = L.presion;
+  const c = [
+    crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°). Bueno: del SE al S (120°-210°)`, enSector(dE,120,210), 25),
+    crit(`Dirección del viento en Landas: ${rosa(L.dir)} (${f0(L.dir)}°). Bueno: del E al S (80°-205°)`, enSector(L.dir,80,205), 15),
+    crit(`Presión en Landas ${f0(p)} hPa. Buena: ≥ 1017 (parcial ≥ 1010)`, p >= 1017, 25, p >= 1017 ? 25 : (p >= 1010 ? 12 : 0)),
+    crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: ≤ 20 km/h y rachas ≤ 40 (parcial ≤ 28 y ≤ 50)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
+    crit(`FUERZA del viento en Landas ${f0(L.viento)} km/h. Bueno: ≤ 18 km/h (parcial ≤ 25)`, L.viento <= 18, 10, L.viento <= 18 ? 10 : (L.viento <= 25 ? 5 : 0)),
+  ];
+  const ll = sumaLluvia(L, U);
+  c.push(crit("Lluvia en la ventana: " + (ll == null ? "sin dato" : f1(ll)+" mm") + ". Buena: ≤ 0,5 mm", ll == null || ll <= 0.5, 10));
+  const resumen = `viento Andoain ${rosa(dE)} ${f0(vE)} km/h, Landas ${rosa(L.dir)}, ${f0(p)} hPa`;
+  const nota = enCal(dia,[10,10],[11,30]) ? null : "Fuera del calendario habitual (10 oct - 30 nov)";
+  return cerrar(c, resumen, nota);
+}
+
+function evalBecada(P, dia) {
+  const a = hh(dia,21), b = hh(dia+DIA,6);
+  const S = todos(P, ["landas","burdeos","poitiers","andoain"], a, b); if (!S) return null;
+  const fr = [S.landas, S.burdeos, S.poitiers];
+  const n = fr.filter(s => enSector(s.dir,340,135)).length;
+  const vFr = fr.reduce((p,s)=>p+s.viento,0)/3, tFr = fr.reduce((p,s)=>p+s.temp,0)/3;
+  const L = S.landas, dp = cambio24(P.landas, "pressure_msl", b);
+  const c = [
+    crit(`Viento en Francia (Landas/Burdeos/Poitiers): ${n} de 3 puntos del N al ESE (340°-135°). Landas ${rosa(L.dir)}`, n >= 2, 30, n === 3 ? 30 : (n === 2 ? 20 : 0)),
+    crit(`FUERZA del viento medio en Francia ${f0(vFr)} km/h. Bueno: ≤ 15 km/h (parcial ≤ 25)`, vFr <= 15, 20, vFr <= 15 ? 20 : (vFr <= 25 ? 10 : 0)),
+    crit(`Temperatura media nocturna en Francia ${f1(tFr)} °C. Buena: ≤ 7 (parcial ≤ 9)`, tFr <= 7, 25, tFr <= 7 ? 25 : (tFr <= 9 ? 10 : 0)),
+    crit(`Presión en Landas: ${f0(L.presion)} hPa` + (dp == null ? "" : `, cambio 24 h ${sg1(dp)}`) + ". Buena: bajando ≥ 3 hPa o ≥ 1025",
+         (dp != null && dp <= -3) || L.presion >= 1025, 15),
+  ];
+  const ll = sumaLluvia(L, S.andoain);
+  c.push(crit("Lluvia en la noche: " + (ll == null ? "sin dato" : f1(ll)+" mm") + ". Buena: ≤ 1 mm", ll == null || ll <= 1.0, 10));
+  const resumen = `Francia viento ${rosa(L.dir)} ${f0(vFr)} km/h, ${f1(tFr)} °C, ${f0(L.presion)} hPa`;
+  const nota = enCal(dia,[10,25],[12,20]) ? null : "Fuera del calendario habitual (25 oct - 20 dic)";
+  return cerrar(c, resumen, nota);
+}
+
+function evalMalviz(P, dia) {
+  const a = hh(dia,7), b = hh(dia,13);
+  const S = todos(P, ["landas","burdeos","urrugne","andoain"], a, b); if (!S) return null;
+  const L = S.landas, B = S.burdeos, U = S.urrugne, A = S.andoain;
+  const nubes = (L.nubes + B.nubes)/2;
+  const dp = cambio24(P.landas, "pressure_msl", b), dt = cambio24(P.landas, "temperature_2m", b);
+  const dE = dirComb(U, A), ll = sumaLluvia(L, U), vE = (U.viento + A.viento)/2, rE = maxRacha(U, A);
+  const txtR = rE == null ? "" : `, rachas hasta ${f0(rE)}`;
+  const fz = vE <= 30 && (rE == null || rE <= 50);
+  const cFuerza = crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: ≤ 30 km/h y rachas ≤ 50`, fz, 10);
+  const enC = enCal(dia,[10,10],[11,25]);
+  const txtDt = "Temperatura en Landas " + (dt == null ? "sin dato" : `${sg1(dt)} °C en 24 h`) + ". Bueno: bajando ≥ 1";
+  const cA = [
+    crit(`Nubes en Landas/Burdeos ${f0(nubes)} %. Bueno: ≥ 85 %`, nubes >= 85, 25),
+    crit("Presión en Landas " + (dp == null ? "sin dato" : `${sg1(dp)} hPa en 24 h`) + ". Bueno: bajando ≥ 3", dp != null && dp <= -3, 30),
+    crit(txtDt, dt != null && dt <= -1, 10),
+    cFuerza,
+    crit("Lluvia en la ventana: " + (ll == null ? "sin dato" : f1(ll)+" mm") + ". Bueno: ≤ 2 mm", ll == null || ll <= 2, 10),
+    crit("Dentro del calendario (10 oct - 25 nov)", enC, 15),
+  ];
+  const cB = [
+    crit(`Viento en Landas del ${rosa(L.dir)} (${f0(L.dir)}°). Bueno: del NNO al NE (330°-60°)`, enSector(L.dir,330,60), 35),
+    crit(`Viento en Andoain/Urrugne del ${rosa(dE)} (${f0(dE)}°). Bueno: NNO a NE`, enSector(dE,330,60), 25),
+    crit(txtDt, dt != null && dt <= -1, 10),
+    cFuerza,
+    crit("Dentro del calendario (10 oct - 25 nov)", enC, 15),
+  ];
+  const sum = c => c.reduce((p,x)=>p+x.pts,0);
+  let c, patron, resumen, claveOk;
+  if (sum(cA) >= sum(cB)) { c = cA; patron = "Patrón A (tus 2 días: nublado y presión bajando)";
+    resumen = `nubes ${f0(nubes)} %, presión ` + (dp == null ? "?" : `${sg1(dp)} hPa/24 h`); claveOk = cA[1].ok; }
+  else { c = cB; patron = "Patrón B (bibliografía: viento N-NE y frío, sin contrastar)";
+    resumen = `viento Landas ${rosa(L.dir)}, Andoain ${rosa(dE)}`; claveOk = cB[0].ok; }
+  let nota = patron + ". Solo 2 días de referencia.";
+  if (!claveOk) nota += " Falta la condición clave: no pasa de 50.";
+  if (!enC) nota += " Fuera del calendario habitual.";
+  return cerrar(c, resumen, nota, enC, claveOk);
+}
+
+/* --- parecido con los 14 dias de pase --- */
+const RASGOS = [
+  ["landas.presion",6,2,0],["andoain.presion",6,1,0],["landas.dp",5,2,0],
+  ["landas.viento",12,1.5,0],["landas.dir",60,2,1],["andoain.viento",12,1.5,0],["andoain.dir",60,2,1],
+  ["landas.nubes",40,1,0],["andoain.nubes",40,1,0],["landas.temp",4,1,0],["burdeos.temp",4,1,0],
+  ["burdeos.viento",12,1,0],["burdeos.dir",60,1,1],["poitiers.dir",60,1,1],["poitiers.temp",4,1,0],
+];
+function rasgos(P, esp, dia) {
+  let a, b, lug;
+  if (esp === "becada") { a = hh(dia,21); b = hh(dia+DIA,6); lug = ["landas","burdeos","poitiers","andoain"]; }
+  else { a = hh(dia,7); b = hh(dia,13); lug = ["landas","burdeos","andoain"]; }
+  const f = {};
+  for (const k of lug) { if (!P[k]) return null; const s = estadisticas(P[k], a, b); if (!s) return null;
+    f[k+".presion"] = s.presion; f[k+".temp"] = s.temp; f[k+".viento"] = s.viento; f[k+".dir"] = s.dir; f[k+".nubes"] = s.nubes; }
+  f["landas.dp"] = cambio24(P.landas, "pressure_msl", b);
+  return f;
+}
+function parecido(f1_, f2_) {
+  let tot = 0, pes = 0;
+  for (const [k, tol, peso, circ] of RASGOS) {
+    const x = f1_[k], y = f2_[k]; if (x == null || y == null) continue;
+    let d = Math.abs(x - y); if (circ) d = Math.min(d, 360 - d);
+    tot += peso*Math.max(0, 1 - d/tol); pes += peso;
+  }
+  return pes === 0 ? null : 100*tot/pes;
+}
+function mejorParecido(P, esp, dia, refs) {
+  const f = rasgos(P, esp, dia); if (!f) return null;
+  let m = null;
+  for (const r of refs) { if (r.esp !== esp) continue; const v = parecido(f, r.f);
+    if (v != null && (m == null || v > m.pct)) m = {pct: v, fecha: r.fecha}; }
+  return m;
+}
+const nivel = p => p >= UMBRAL.alta ? "alta" : (p >= UMBRAL.media ? "media" : "baja");
+
+function analizar(P, hoy, ahora, nDias, refs) {
+  const fun = {paloma:[evalPaloma, d => hh(d,13)], becada:[evalBecada, d => hh(d+DIA,6)], malviz:[evalMalviz, d => hh(d,13)]};
+  const res = [];
+  for (let k = 0; k <= nDias; k++) {
+    const dia = hoy + k*DIA, fila = {dia, k};
+    for (const e of ESPECIES) {
+      const [f, fin] = fun[e];
+      if (fin(dia) < ahora) { fila[e] = null; continue; }
+      const r = f(P, dia);
+      if (r) {
+        r.nivel = nivel(r.puntos);
+        r.parecido = refs && refs.length ? mejorParecido(P, e, dia, refs) : null;
+        const fuera = r.nota && r.nota.includes("Fuera del calendario");
+        if (r.parecido && r.parecido.pct >= UMBRAL.parecido && r.nivel === "baja" && !fuera) {
+          r.nivel = "media"; r.nota = (r.nota ? r.nota + " " : "") + "Subida a MEDIA: muy parecido a un día de gran pase."; }
+      }
+      fila[e] = r;
+    }
+    res.push(fila);
+  }
+  return res;
+}
+if (false && typeof module !== "undefined") module.exports = {construir, evalPaloma, evalBecada, evalMalviz, rasgos, parecido, analizar, nivel, DIA, HORA};
+
+const REFS = [{"esp": "becada", "fecha": "2019-11-20", "f": {"landas.presion": 1013.86, "landas.temp": 2.97, "landas.viento": 10.98, "landas.dir": 104.549, "landas.nubes": 96.4, "burdeos.presion": 1014.02, "burdeos.temp": 2.35, "burdeos.viento": 8.44, "burdeos.dir": 127.672, "burdeos.nubes": 96.3, "poitiers.presion": 1015.49, "poitiers.temp": 2.75, "poitiers.viento": 9.06, "poitiers.dir": 91.909, "poitiers.nubes": 90.8, "andoain.presion": 1011.94, "andoain.temp": 7.72, "andoain.viento": 13.75, "andoain.dir": 170.627, "andoain.nubes": 99.9, "landas.dp": -7.7}}, {"esp": "becada", "fecha": "2020-11-23", "f": {"landas.presion": 1029.05, "landas.temp": 2.99, "landas.viento": 3.26, "landas.dir": 116.296, "landas.nubes": 0.6, "burdeos.presion": 1029.0, "burdeos.temp": 6.2, "burdeos.viento": 3.79, "burdeos.dir": 127.61, "burdeos.nubes": 0.0, "poitiers.presion": 1029.35, "poitiers.temp": 3.05, "poitiers.viento": 5.77, "poitiers.dir": 7.747, "poitiers.nubes": 5.7, "andoain.presion": 1029.1, "andoain.temp": 8.16, "andoain.viento": 8.03, "andoain.dir": 186.175, "andoain.nubes": 16.1, "landas.dp": 1.4}}, {"esp": "becada", "fecha": "2020-11-24", "f": {"landas.presion": 1026.14, "landas.temp": 4.77, "landas.viento": 9.17, "landas.dir": 94.224, "landas.nubes": 96.3, "burdeos.presion": 1026.28, "burdeos.temp": 4.24, "burdeos.viento": 8.7, "burdeos.dir": 121.418, "burdeos.nubes": 97.5, "poitiers.presion": 1027.14, "poitiers.temp": 2.82, "poitiers.viento": 7.91, "poitiers.dir": 96.08, "poitiers.nubes": 53.7, "andoain.presion": 1024.84, "andoain.temp": 7.95, "andoain.viento": 10.52, "andoain.dir": 174.512, "andoain.nubes": 95.2, "landas.dp": -6.0}}, {"esp": "becada", "fecha": "2021-11-22", "f": {"landas.presion": 1012.7, "landas.temp": 6.61, "landas.viento": 6.65, "landas.dir": 70.907, "landas.nubes": 89.9, "burdeos.presion": 1012.79, "burdeos.temp": 6.44, "burdeos.viento": 5.79, "burdeos.dir": 95.217, "burdeos.nubes": 98.8, "poitiers.presion": 1014.45, "poitiers.temp": 6.21, "poitiers.viento": 14.13, "poitiers.dir": 29.919, "poitiers.nubes": 100.0, "andoain.presion": 1013.07, "andoain.temp": 9.28, "andoain.viento": 10.74, "andoain.dir": 262.432, "andoain.nubes": 94.0, "landas.dp": -5.3}}, {"esp": "paloma", "fecha": "2022-10-16", "f": {"landas.presion": 1013.114, "landas.temp": 18.214, "landas.viento": 7.143, "landas.dir": 116.696, "landas.nubes": 33.143, "burdeos.presion": 1012.543, "burdeos.temp": 18.586, "burdeos.viento": 10.786, "burdeos.dir": 131.73, "burdeos.nubes": 72.571, "andoain.presion": 1012.129, "andoain.temp": 21.743, "andoain.viento": 19.657, "andoain.dir": 168.784, "andoain.nubes": 60.571, "landas.dp": -1.5}}, {"esp": "paloma", "fecha": "2022-10-18", "f": {"landas.presion": 1022.243, "landas.temp": 19.9, "landas.viento": 11.314, "landas.dir": 101.289, "landas.nubes": 13.143, "burdeos.presion": 1022.571, "burdeos.temp": 19.8, "burdeos.viento": 13.386, "burdeos.dir": 120.473, "burdeos.nubes": 31.0, "andoain.presion": 1020.814, "andoain.temp": 22.843, "andoain.viento": 22.557, "andoain.dir": 164.705, "andoain.nubes": 11.714, "landas.dp": 1.1}}, {"esp": "paloma", "fecha": "2022-10-25", "f": {"landas.presion": 1014.071, "landas.temp": 18.614, "landas.viento": 11.9, "landas.dir": 121.503, "landas.nubes": 97.286, "burdeos.presion": 1014.157, "burdeos.temp": 16.529, "burdeos.viento": 14.114, "burdeos.dir": 130.903, "burdeos.nubes": 98.571, "andoain.presion": 1012.486, "andoain.temp": 20.757, "andoain.viento": 18.786, "andoain.dir": 167.428, "andoain.nubes": 100.0, "landas.dp": -3.4}}, {"esp": "malviz", "fecha": "2022-10-29", "f": {"landas.presion": 1017.057, "landas.temp": 19.229, "landas.viento": 6.671, "landas.dir": 85.876, "landas.nubes": 99.857, "burdeos.presion": 1017.029, "burdeos.temp": 18.9, "burdeos.viento": 11.2, "burdeos.dir": 135.904, "burdeos.nubes": 96.0, "andoain.presion": 1016.5, "andoain.temp": 22.371, "andoain.viento": 26.029, "andoain.dir": 165.834, "andoain.nubes": 100.0, "landas.dp": -4.7}}, {"esp": "paloma", "fecha": "2022-11-07", "f": {"landas.presion": 1018.0, "landas.temp": 11.643, "landas.viento": 7.071, "landas.dir": 126.63, "landas.nubes": 0.0, "burdeos.presion": 1017.671, "burdeos.temp": 12.2, "burdeos.viento": 10.286, "burdeos.dir": 163.706, "burdeos.nubes": 10.0, "andoain.presion": 1017.043, "andoain.temp": 14.557, "andoain.viento": 11.243, "andoain.dir": 180.497, "andoain.nubes": 9.571, "landas.dp": 1.0}}, {"esp": "paloma", "fecha": "2023-10-28", "f": {"landas.presion": 1003.914, "landas.temp": 15.186, "landas.viento": 13.214, "landas.dir": 204.398, "landas.nubes": 69.143, "burdeos.presion": 1001.8, "burdeos.temp": 15.414, "burdeos.viento": 20.6, "burdeos.dir": 195.696, "burdeos.nubes": 99.571, "andoain.presion": 1003.243, "andoain.temp": 17.943, "andoain.viento": 25.757, "andoain.dir": 193.323, "andoain.nubes": 47.571, "landas.dp": -1.2}}, {"esp": "paloma", "fecha": "2023-11-01", "f": {"landas.presion": 1008.7, "landas.temp": 12.386, "landas.viento": 16.229, "landas.dir": 224.186, "landas.nubes": 93.286, "burdeos.presion": 1006.657, "burdeos.temp": 13.686, "burdeos.viento": 23.714, "burdeos.dir": 224.947, "burdeos.nubes": 73.857, "andoain.presion": 1009.757, "andoain.temp": 14.171, "andoain.viento": 15.414, "andoain.dir": 199.969, "andoain.nubes": 88.429, "landas.dp": -3.9}}, {"esp": "malviz", "fecha": "2023-11-09", "f": {"landas.presion": 1015.443, "landas.temp": 11.757, "landas.viento": 13.357, "landas.dir": 250.297, "landas.nubes": 89.857, "burdeos.presion": 1013.6, "burdeos.temp": 12.129, "burdeos.viento": 16.171, "burdeos.dir": 254.334, "burdeos.nubes": 66.429, "andoain.presion": 1017.086, "andoain.temp": 12.343, "andoain.viento": 11.943, "andoain.dir": 247.508, "andoain.nubes": 72.714, "landas.dp": -4.0}}, {"esp": "paloma", "fecha": "2024-10-21", "f": {"landas.presion": 1021.843, "landas.temp": 16.586, "landas.viento": 5.429, "landas.dir": 90.872, "landas.nubes": 0.0, "burdeos.presion": 1021.943, "burdeos.temp": 16.186, "burdeos.viento": 8.614, "burdeos.dir": 141.205, "burdeos.nubes": 0.0, "andoain.presion": 1021.414, "andoain.temp": 19.886, "andoain.viento": 14.486, "andoain.dir": 195.596, "andoain.nubes": 0.0, "landas.dp": 0.6}}, {"esp": "paloma", "fecha": "2024-11-01", "f": {"landas.presion": 1022.086, "landas.temp": 13.914, "landas.viento": 5.671, "landas.dir": 98.26, "landas.nubes": 100.0, "burdeos.presion": 1022.471, "burdeos.temp": 14.014, "burdeos.viento": 8.071, "burdeos.dir": 94.221, "burdeos.nubes": 0.0, "andoain.presion": 1020.829, "andoain.temp": 17.314, "andoain.viento": 5.1, "andoain.dir": 133.06, "andoain.nubes": 26.571, "landas.dp": 0.1}}].map(r => ({...r, fecha: r.fecha}));
+const TABLA = [{"fecha": "2019-11-20", "esp": "becada", "l0": 1018.1, "l1": 1009.6, "a0": 1017.0, "a1": 1008.2}, {"fecha": "2020-11-23", "esp": "becada", "l0": 1028.2, "l1": 1028.8, "a0": 1027.3, "a1": 1028.5}, {"fecha": "2020-11-24", "esp": "becada", "l0": 1028.8, "l1": 1021.5, "a0": 1028.5, "a1": 1020.5}, {"fecha": "2021-11-22", "esp": "becada", "l0": 1015.5, "l1": 1013.8, "a0": 1016.5, "a1": 1013.3}, {"fecha": "2022-10-16", "esp": "paloma", "l0": 1014.6, "l1": 1012.9, "a0": 1014.3, "a1": 1012.3}, {"fecha": "2022-10-18", "esp": "paloma", "l0": 1019.4, "l1": 1021.2, "a0": 1018.7, "a1": 1020.1}, {"fecha": "2022-10-25", "esp": "paloma", "l0": 1015.3, "l1": 1013.8, "a0": 1015.3, "a1": 1012.9}, {"fecha": "2022-10-29", "esp": "malviz", "l0": 1019.8, "l1": 1017.1, "a0": 1019.1, "a1": 1016.4}, {"fecha": "2022-11-07", "esp": "paloma", "l0": 1017.3, "l1": 1016.5, "a0": 1017.1, "a1": 1015.6}, {"fecha": "2023-10-28", "esp": "paloma", "l0": 1004.8, "l1": 1003.1, "a0": 1005.3, "a1": 1002.6}, {"fecha": "2023-11-01", "esp": "paloma", "l0": 1012.6, "l1": 1008.3, "a0": 1012.6, "a1": 1007.9}, {"fecha": "2023-11-09", "esp": "malviz", "l0": 1019.4, "l1": 1015.0, "a0": 1019.1, "a1": 1016.3}, {"fecha": "2024-10-21", "esp": "paloma", "l0": 1021.1, "l1": 1022.9, "a0": 1020.5, "a1": 1023.2}, {"fecha": "2024-11-01", "esp": "paloma", "l0": 1021.5, "l1": 1021.7, "a0": 1020.8, "a1": 1020.8}];
+const DS = ["lun","mar","mié","jue","vie","sáb","dom"];
+const etiq = d => { const x = new Date(d); return `${DS[(x.getUTCDay()+6)%7]} ${x.getUTCDate()}/${x.getUTCMonth()+1}`; };
+const fechaCorta = iso => { const [y,m,d] = iso.split("-"); return `${+d}/${+m}/${y.slice(2)}`; };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let RES = [], SEL = null, ULTIMA = null;
+const REFS_F = REFS.map(r => ({esp:r.esp, fecha:r.fecha, f:r.f}));
+
+async function bajar(lat, lon) {
+  const q = new URLSearchParams({latitude:lat, longitude:lon, hourly:VARS.join(","),
+    timezone:"Europe/Madrid", wind_speed_unit:"kmh", past_days:2, forecast_days:9});
+  const r = await fetch("https://api.open-meteo.com/v1/forecast?" + q);
+  if (!r.ok) throw new Error("Open-Meteo respondió " + r.status);
+  const h = (await r.json()).hourly;
+  return construir(h.time.map(t => Date.parse(t + ":00Z")), h);
+}
+async function cargar() {
+  $("act").disabled = true; $("estado").textContent = "Descargando previsión…";
+  try {
+    const nombres = Object.keys(LUGARES);
+    const datos = await Promise.all(nombres.map(k => bajar(...LUGARES[k])));
+    const P = {}; nombres.forEach((k,i) => P[k] = datos[i]);
+    const n = new Date(), ahora = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours(), n.getMinutes());
+    const hoy = Math.floor(ahora/DIA)*DIA;
+    RES = analizar(P, hoy, ahora, 7, REFS_F);
+    ULTIMA = n;
+    $("estado").textContent = "Actualizado " + n.toLocaleString("es-ES", {weekday:"short", hour:"2-digit", minute:"2-digit"});
+    SEL = mejorCelda() || SEL;
+    pintar();
+  } catch (e) {
+    $("estado").textContent = "Sin datos";
+    $("prev").innerHTML = `<div class="msg"><b>No se pudo descargar la previsión.</b><br>${esc(e.message)}.<br>Comprueba la conexión y pulsa Actualizar.</div>`;
+  }
+  $("act").disabled = false;
+}
+function mejorCelda() {
+  let m = null;
+  RES.forEach(f => ESPECIES.forEach(e => { const r = f[e];
+    if (r && (!m || r.puntos > m.p)) m = {p:r.puntos, k:f.k, e}; }));
+  return m && {k:m.k, e:m.e};
+}
+function cuando(f, e) { return e === "becada" ? "noche del " + etiq(f.dia) : etiq(f.dia); }
+function pintar() {
+  if (!RES.length) return;
+  const m = mejorCelda(); let top = "";
+  if (m) { const f = RES[m.k], r = f[m.e];
+    top = `<div class="mejor">Mejor opción de la semana<br><b>${NOMBRE[m.e]} · ${cuando(f, m.e)} · ${r.puntos}/100 ${r.nivel.toUpperCase()}</b>` +
+      (m.k >= 3 ? `<br><small>Previsión a ${m.k} días, orientativa.</small>` : "") + `</div>`; }
+  const filas = RES.map(f => `<tr><th class="d">${etiq(f.dia)}${f.k >= 3 ? "<small>orientativa</small>" : ""}</th>` +
+    ESPECIES.map(e => { const r = f[e];
+      if (!r) return `<td class="na">–</td>`;
+      const on = SEL && SEL.k === f.k && SEL.e === e;
+      return `<td><button type="button" class="c ${r.nivel}" data-k="${f.k}" data-e="${e}" aria-pressed="${on}">` +
+        `<span class="n">${r.puntos}</span><span class="l">${r.nivel.toUpperCase()}</span>` +
+        (r.parecido ? `<span class="p">≈${r.parecido.pct.toFixed(0)}% ${fechaCorta(r.parecido.fecha)}</span>` : "") +
+        `</button></td>`; }).join("") + `</tr>`).join("");
+  $("prev").innerHTML = top +
+    `<div class="wrap"><table><tr><th></th><th>Paloma<small>día 7-13 h</small></th><th>Becada<small>noche 21-6 h</small></th><th>Malviz<small>día 7-13 h</small></th></tr>${filas}</table></div>` +
+    `<div class="leg"><span><i style="background:var(--alta)"></i>Alta ≥ 75</span><span><i style="background:var(--media)"></i>Media ≥ 55</span><span><i style="background:var(--line)"></i>Baja</span><span>≈ % de parecido con tu día de pase más similar</span></div>` +
+    `<div id="det"></div>` +
+    `<div class="links"><a href="https://www.windguru.cz/" target="_blank" rel="noopener">Windguru: comprobar el viento</a></div>`;
+  detalle();
+  document.querySelectorAll(".c").forEach(b => b.addEventListener("click", () => {
+    SEL = {k:+b.dataset.k, e:b.dataset.e}; pintar(); $("det").scrollIntoView({behavior:"smooth", block:"nearest"}); }));
+}
+function detalle() {
+  if (!SEL || !RES[SEL.k] || !RES[SEL.k][SEL.e]) { $("det").innerHTML = ""; return; }
+  const f = RES[SEL.k], r = f[SEL.e];
+  $("det").innerHTML = `<section class="det"><h2>${NOMBRE[SEL.e]} · ${cuando(f, SEL.e)}</h2>` +
+    `<div><b>${r.puntos}/100 ${r.nivel.toUpperCase()}</b> · ${esc(r.resumen)}</div>` +
+    (r.nota ? `<p class="nota">${esc(r.nota)}</p>` : `<p class="nota"></p>`) +
+    `<ul class="cr">` + r.criterios.map(x => `<li><span class="m ${x.ok ? "si" : "no"}">${x.ok ? "✔" : "✘"}</span><span>${esc(x.texto)}</span><span class="pt">${x.pts}/${x.max}</span></li>`).join("") + `</ul>` +
+    (r.parecido ? `<div class="par">Se parece un <b>${r.parecido.pct.toFixed(0)} %</b> a tu día de pase del <b>${fechaCorta(r.parecido.fecha)}</b>. Tus días entre sí se parecen del 36 al 73 %.</div>` : "") +
+    `</section>`;
+}
+function pintarRef() {
+  const f1 = x => x.toFixed(1), sg = x => (x > 0 ? "+" : "") + x.toFixed(1);
+  const filas = TABLA.map(t => { const d1 = t.l1 - t.l0, d2 = t.a1 - t.a0;
+    return `<tr><td>${fechaCorta(t.fecha)}<br><span class="sp">${NOMBRE[t.esp]}</span></td>` +
+      `<td class="t">${f1(t.l0)}</td><td class="t">${f1(t.l1)}</td><td class="t ${d1 < 0 ? "dn" : "up"}">${sg(d1)}</td>` +
+      `<td class="t">${f1(t.a0)}</td><td class="t">${f1(t.a1)}</td><td class="t ${d2 < 0 ? "dn" : "up"}">${sg(d2)}</td></tr>`; }).join("");
+  $("ref").innerHTML = `<p class="sub" style="font-size:14px">Presión media (hPa) del día previo y del día de pase, en Landas y en Andoain. En el becada, el día de pase es la mañana en que llegaron, tras la noche anterior.</p>` +
+    `<div class="ref wrap"><table><tr><th rowspan="2">Día</th><th colspan="3">Landas</th><th colspan="3">Andoain</th></tr>` +
+    `<tr><th>previo</th><th>pase</th><th>Δ</th><th>previo</th><th>pase</th><th>Δ</th></tr>${filas}</table></div>` +
+    `<p class="pie">Datos de reanálisis ERA5 vía Open-Meteo. En 10 de tus 14 días la presión bajó respecto al día previo. En los otros 4 subió o se mantuvo, y tres de ellos con anticiclón (1021-1023 hPa).</p>`;
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === t));
+  $("prev").hidden = t.dataset.v !== "prev"; $("ref").hidden = t.dataset.v !== "ref"; }));
+$("act").addEventListener("click", cargar);
+pintarRef(); cargar();
+</script>
+</body>
+</html>
