@@ -71,6 +71,10 @@ td.t{font-variant-numeric:tabular-nums}
 .ref td,.ref th{padding:6px 3px;text-align:right;border-bottom:1px solid var(--line)}
 .ref table{border-spacing:0;font-size:14px}
 .ref td:first-child,.ref th:first-child{text-align:left}
+ul.mods{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
+ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;align-items:center;font-size:14px}
+.bar{display:block;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--baja)} .bar i.alta{background:var(--alta)} .bar i.media{background:var(--media)}
 .sp{font:600 13px var(--f-num);letter-spacing:.05em;text-transform:uppercase;color:var(--acc)}
 .dn{color:var(--media)} .up{color:var(--alta)}
 @media (prefers-reduced-motion:no-preference){.c{transition:box-shadow .12s,border-color .12s}}
@@ -311,26 +315,66 @@ const etiq = d => { const x = new Date(d); return `${DS[(x.getUTCDay()+6)%7]} ${
 const fechaCorta = iso => { const [y,m,d] = iso.split("-"); return `${+d}/${+m}/${y.slice(2)}`; };
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let RES = [], SEL = null, ULTIMA = null;
+let RES = [], SEL = null, ULTIMA = null, MODELOS_TXT = "";
 const REFS_F = REFS.map(r => ({esp:r.esp, fecha:r.fecha, f:r.f}));
 
-async function bajar(lat, lon) {
-  const q = new URLSearchParams({latitude:lat, longitude:lon, hourly:VARS.join(","),
-    timezone:"Europe/Madrid", wind_speed_unit:"kmh", past_days:2, forecast_days:9});
-  const r = await fetch("https://api.open-meteo.com/v1/forecast?" + q);
+const OBLIG = ["pressure_msl","temperature_2m","cloud_cover","wind_speed_10m","wind_direction_10m"];
+const MODELOS = [
+  {id:"ecmwf", nombre:"ECMWF", cand:["ecmwf_ifs025","ecmwf_ifs_025","ecmwf_ifs"]},
+  {id:"gfs", nombre:"GFS (el de Windguru)", cand:["gfs_seamless","ncep_gfs_seamless"]},
+  {id:"icon", nombre:"ICON (DWD)", cand:["icon_seamless","dwd_icon_seamless"]},
+  {id:"mf", nombre:"Météo-France", cand:["meteofrance_seamless","meteo_france_seamless"]},
+];
+function elegir(h, v) {
+  if (h[v]) return h[v];
+  const k = Object.keys(h).find(x => x.startsWith(v + "_"));
+  return k ? h[k] : null;
+}
+async function pedir(lat, lon, modelo) {
+  const p = {latitude:lat, longitude:lon, hourly:VARS.join(","), timezone:"Europe/Madrid",
+    wind_speed_unit:"kmh", past_days:2, forecast_days:9};
+  if (modelo) p.models = modelo;
+  const r = await fetch("https://api.open-meteo.com/v1/forecast?" + new URLSearchParams(p));
   if (!r.ok) throw new Error("Open-Meteo respondió " + r.status);
   const h = (await r.json()).hourly;
-  return construir(h.time.map(t => Date.parse(t + ":00Z")), h);
+  const cols = {}; VARS.forEach(v => { const c = elegir(h, v); if (c) cols[v] = c; });
+  if (OBLIG.some(v => !cols[v])) throw new Error("faltan variables");
+  return construir(h.time.map(t => Date.parse(t + ":00Z")), cols);
+}
+async function bajarModelo(m) {
+  // prueba los nombres posibles del modelo en Landas; el que funcione se usa en los demás puntos
+  const nombres = Object.keys(LUGARES);
+  let ok = null, primero = null;
+  for (const c of m.cand) { try { primero = await pedir(...LUGARES.landas, c); ok = c; break; } catch (e) {} }
+  if (!ok) return null;
+  const P = {landas: primero};
+  await Promise.all(nombres.filter(k => k !== "landas").map(async k => { P[k] = await pedir(...LUGARES[k], ok); }));
+  return P;
 }
 async function cargar() {
   $("act").disabled = true; $("estado").textContent = "Descargando previsión…";
   try {
     const nombres = Object.keys(LUGARES);
-    const datos = await Promise.all(nombres.map(k => bajar(...LUGARES[k])));
+    const [datos, ...extra] = await Promise.all([
+      Promise.all(nombres.map(k => pedir(...LUGARES[k], null))),
+      ...MODELOS.map(m => bajarModelo(m).catch(() => null)),
+    ]);
     const P = {}; nombres.forEach((k,i) => P[k] = datos[i]);
     const n = new Date(), ahora = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours(), n.getMinutes());
     const hoy = Math.floor(ahora/DIA)*DIA;
     RES = analizar(P, hoy, ahora, 7, REFS_F);
+    const usados = [], faltan = [];
+    RES.forEach(f => ESPECIES.forEach(e => { if (f[e]) f[e].modelos = [{nombre:"Open-Meteo (mezcla)", puntos:f[e].puntos, nivel:f[e].nivel}]; }));
+    extra.forEach((Pm, i) => {
+      const m = MODELOS[i];
+      if (!Pm) { faltan.push(m.nombre); return; }
+      usados.push(m.nombre);
+      const R = analizar(Pm, hoy, ahora, 7, REFS_F);
+      R.forEach((f, k) => ESPECIES.forEach(e => { const x = f[e], dst = RES[k][e];
+        if (x && dst) dst.modelos.push({nombre:m.nombre, puntos:x.puntos, nivel:x.nivel}); }));
+    });
+    MODELOS_TXT = usados.length ? "Contrastado con: " + usados.join(", ") + (faltan.length ? ". Sin datos de: " + faltan.join(", ") : "")
+                                : "No se pudo contrastar con otros modelos";
     ULTIMA = n;
     $("estado").textContent = "Actualizado " + n.toLocaleString("es-ES", {weekday:"short", hour:"2-digit", minute:"2-digit"});
     SEL = mejorCelda() || SEL;
@@ -347,6 +391,12 @@ function mejorCelda() {
     if (r && (!m || r.puntos > m.p)) m = {p:r.puntos, k:f.k, e}; }));
   return m && {k:m.k, e:m.e};
 }
+function consenso(r) {
+  const m = r.modelos || []; if (m.length < 2) return null;
+  const si = m.filter(x => x.nivel !== "baja").length;
+  const ps = m.map(x => x.puntos);
+  return {si, n:m.length, min:Math.min(...ps), max:Math.max(...ps)};
+}
 function cuando(f, e) { return e === "becada" ? "noche del " + etiq(f.dia) : etiq(f.dia); }
 function pintar() {
   if (!RES.length) return;
@@ -358,15 +408,17 @@ function pintar() {
     ESPECIES.map(e => { const r = f[e];
       if (!r) return `<td class="na">–</td>`;
       const on = SEL && SEL.k === f.k && SEL.e === e;
+      const cs = consenso(r);
       return `<td><button type="button" class="c ${r.nivel}" data-k="${f.k}" data-e="${e}" aria-pressed="${on}">` +
         `<span class="n">${r.puntos}</span><span class="l">${r.nivel.toUpperCase()}</span>` +
-        (r.parecido ? `<span class="p">≈${r.parecido.pct.toFixed(0)}% ${fechaCorta(r.parecido.fecha)}</span>` : "") +
+        (cs ? `<span class="p">${cs.si}/${cs.n} modelos</span>` : "") +
         `</button></td>`; }).join("") + `</tr>`).join("");
   $("prev").innerHTML = top +
     `<div class="wrap"><table><tr><th></th><th>Paloma<small>día 7-13 h</small></th><th>Becada<small>noche 21-6 h</small></th><th>Malviz<small>día 7-13 h</small></th></tr>${filas}</table></div>` +
-    `<div class="leg"><span><i style="background:var(--alta)"></i>Alta ≥ 75</span><span><i style="background:var(--media)"></i>Media ≥ 55</span><span><i style="background:var(--line)"></i>Baja</span><span>≈ % de parecido con tu día de pase más similar</span></div>` +
+    `<div class="leg"><span><i style="background:var(--alta)"></i>Alta ≥ 75</span><span><i style="background:var(--media)"></i>Media ≥ 55</span><span><i style="background:var(--line)"></i>Baja</span><span>«3/5 modelos»: cuántos dan media o alta</span></div>` +
+    (MODELOS_TXT ? `<p class="sub" style="margin-top:8px">${esc(MODELOS_TXT)}</p>` : "") +
     `<div id="det"></div>` +
-    `<div class="links"><a href="https://www.windguru.cz/" target="_blank" rel="noopener">Windguru: comprobar el viento</a></div>`;
+    `<div class="links"><a href="https://www.windguru.cz/" target="_blank" rel="noopener">Windguru</a><a href="https://www.euskalmet.euskadi.eus/" target="_blank" rel="noopener">Euskalmet</a><a href="https://www.aemet.es/" target="_blank" rel="noopener">AEMET</a><a href="https://meteofrance.com/" target="_blank" rel="noopener">Météo-France</a><a href="https://meteoconsult.fr/" target="_blank" rel="noopener">Meteoconsult</a><a href="https://www.meteoblue.com/es/" target="_blank" rel="noopener">Meteoblue</a></div><p class="sub">Enlaces para mirar a mano. Estas webs no dejan que la página lea sus datos.</p>`;
   detalle();
   document.querySelectorAll(".c").forEach(b => b.addEventListener("click", () => {
     SEL = {k:+b.dataset.k, e:b.dataset.e}; pintar(); $("det").scrollIntoView({behavior:"smooth", block:"nearest"}); }));
@@ -378,8 +430,17 @@ function detalle() {
     `<div><b>${r.puntos}/100 ${r.nivel.toUpperCase()}</b> · ${esc(r.resumen)}</div>` +
     (r.nota ? `<p class="nota">${esc(r.nota)}</p>` : `<p class="nota"></p>`) +
     `<ul class="cr">` + r.criterios.map(x => `<li><span class="m ${x.ok ? "si" : "no"}">${x.ok ? "✔" : "✘"}</span><span>${esc(x.texto)}</span><span class="pt">${x.pts}/${x.max}</span></li>`).join("") + `</ul>` +
+    contrasteHtml(r) +
     (r.parecido ? `<div class="par">Se parece un <b>${r.parecido.pct.toFixed(0)} %</b> a tu día de pase del <b>${fechaCorta(r.parecido.fecha)}</b>. Tus días entre sí se parecen del 36 al 73 %.</div>` : "") +
     `</section>`;
+}
+function contrasteHtml(r) {
+  const cs = consenso(r); if (!cs) return "";
+  const dif = cs.max - cs.min >= 30;
+  const filas = r.modelos.map(x => `<li><span class="mn">${esc(x.nombre)}</span><span class="bar"><i class="${x.nivel}" style="width:${Math.max(3, x.puntos)}%"></i></span><span class="pt">${x.puntos} ${x.nivel.toUpperCase()}</span></li>`).join("");
+  return `<div class="par"><b>Contraste entre modelos:</b> ${cs.si} de ${cs.n} dan MEDIA o ALTA` +
+    (dif ? `. <b>Discrepan</b>: van de ${cs.min} a ${cs.max}, así que la previsión es poco segura.` : `, con puntuaciones parecidas (${cs.min}-${cs.max}).`) +
+    `<ul class="mods">${filas}</ul></div>`;
 }
 function pintarRef() {
   const f1 = x => x.toFixed(1), sg = x => (x > 0 ? "+" : "") + x.toFixed(1);
