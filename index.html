@@ -141,7 +141,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li><b>La presión alta o baja:</b> tus días van de 1000 a 1022 hPa y solo 7 de 13 pasan de 1017, igual que la mitad de los días de la temporada. Ya no puntúa el valor de la presión, solo que se mantenga estable.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50) y puntúa fuerza del viento, temperatura, presión estable y lluvia. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div>
+<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div>
 <div class="esp"><h3>Becada <span class="chip">9 noches · confianza media-baja</span></h3>
 <h4>Dos tipos de noche</h4>
 <ul>
@@ -175,7 +175,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li>El viento N-NE de la bibliografía no salió en ninguno de tus días, ni el frío. Esa regla ya no se usa.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Calcula los patrones y se queda con el que más puntos da. El de calor y viento del sur exige 16 °C o más en Landas y viento del SSE al OSO en Euskadi (sin eso no pasa de 50). Hay además un tercer patrón de día claro con viento flojo del ESE, que solo viene de tu día del 1/11/24 ★ y no pasa de 75. Con todos los patrones, 15 de tus 17 días sacan 90 o más (y 16 de 17 sacan 70 o más), frente al 33 % de los días de la temporada con 90 o más. Es la especie con más avisos: 1 de cada 3 días de la temporada sale ALTA. El segundo patrón sale de una sola semana, así que es el menos fiable.</p></div>
+<p>Calcula los patrones y se queda con el que más puntos da. El de calor y viento del sur exige 16 °C o más en Landas y viento del SSE al OSO en Euskadi (sin eso no pasa de 50). La niebla por la mañana limita la nota a 50, igual que en la paloma. Tus 17 días tampoco tuvieron niebla: el 9/11/23 tuvo humedad del 99 %, pero con lluvia, que no cuento como niebla. Hay además un tercer patrón de día claro con viento flojo del ESE, que solo viene de tu día del 1/11/24 ★ y no pasa de 75. Con todos los patrones, 15 de tus 17 días sacan 90 o más (y 16 de 17 sacan 70 o más), frente al 33 % de los días de la temporada con 90 o más. Es la especie con más avisos: 1 de cada 3 días de la temporada sale ALTA. El segundo patrón sale de una sola semana, así que es el menos fiable.</p></div>
 <div class="esp"><h3>Para las tres especies</h3>
 <ul>
 <li><b>Viento flojo en Landas:</b> casi todos los días buenos tienen 16 km/h o menos, pero en la temporada ocurre el 92 % de los días, así que no distingue nada.</li>
@@ -234,7 +234,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 /* ===== NUCLEO: reglas de pasa (equivale a alerta_pasa.py) ===== */
 const LUGARES = {landas:[43.89,-0.50], burdeos:[44.83,-0.70], poitiers:[46.58,0.34],
                  urrugne:[43.37,-1.70], andoain:[43.22,-2.02]};
-const VARS = ["pressure_msl","temperature_2m","cloud_cover","wind_speed_10m","wind_direction_10m","precipitation","wind_gusts_10m","sunshine_duration"];
+const VARS = ["pressure_msl","temperature_2m","cloud_cover","wind_speed_10m","wind_direction_10m","precipitation","wind_gusts_10m","sunshine_duration","relative_humidity_2m"];
 const ESPECIES = ["paloma","becada","malviz"];
 const NOMBRE = {paloma:"Paloma", becada:"Becada", malviz:"Malviz/zorzal"};
 const UMBRAL = {alta:90, media:70, parecido:70};
@@ -291,6 +291,19 @@ function cambio24(D, v, fin) {
 }
 function sumaLluvia(...st) { const v = st.map(s => s.lluvia).filter(x => x != null);
   return v.length ? v.reduce((p,c)=>p+c,0) : null; }
+// niebla por la mañana (7-10 h): humedad media de 96 % o más en Andoain o Urrugne y sin lluvia (la humedad alta con lluvia no es niebla)
+function nieblaManana(P, dia) {
+  let rhMax = null, lluvia = 0;
+  for (const k of ["andoain","urrugne"]) { const D = P[k]; if (!D || !D.relative_humidity_2m) continue;
+    const v = [], ll = []; D.t.forEach((t,i) => { if (t >= hh(dia,7) && t <= hh(dia,10)) { if (D.relative_humidity_2m[i] != null) v.push(D.relative_humidity_2m[i]); if (D.precipitation && D.precipitation[i] != null) ll.push(D.precipitation[i]); } });
+    if (v.length >= 3) { const m = v.reduce((p,c)=>p+c,0)/v.length; if (rhMax == null || m > rhMax) rhMax = m; lluvia = Math.max(lluvia, ll.reduce((p,c)=>p+c,0)); } }
+  return rhMax == null ? null : {rh: rhMax, probable: rhMax >= 96 && lluvia <= 0.5};
+}
+function aplicarNiebla(r, P, dia) {
+  const n = nieblaManana(P, dia); if (!n || !n.probable) return;
+  r.puntos = Math.min(r.puntos, 50);
+  r.nota = (r.nota ? r.nota + " " : "") + "Niebla probable por la mañana (humedad " + f0(n.rh) + " % de 7 a 10 h, sin lluvia): no pasa de 50.";
+}
 function crit(texto, ok, max, pts) { return {texto, ok, max, pts: pts == null ? (ok ? max : 0) : pts}; }
 function maxRacha(U, A) { const r = [U.racha, A.racha].filter(x => x != null); return r.length ? Math.max(...r) : null; }
 function cerrar(c, resumen, nota, limiteCal, claveOk) {
@@ -337,6 +350,7 @@ function evalPaloma(P, dia) {
   if (mE != null && mE > 3) { r.puntos = Math.min(r.puntos, 30); addN("Lluvia en Euskadi de más de 3 mm (" + f1(mE) + " mm): la paloma no pasa con lluvia, no pasa de 30."); }
   else if (mE != null && mE > 1) { r.puntos = Math.min(r.puntos, 50); addN("Lluvia en Euskadi de más de 1 mm (" + f1(mE) + " mm): la paloma no pasa con lluvia, no pasa de 50."); }
   else if (L.lluvia != null && L.lluvia > 3) { r.puntos = Math.min(r.puntos, 60); addN("Llueve en Landas (" + f1(L.lluvia) + " mm): no pasa de 60."); }
+  aplicarNiebla(r, P, dia);
   return r;
 }
 
@@ -453,6 +467,7 @@ function evalMalviz(P, dia) {
   const r = cerrar(c, resumen, nota, enC, claveOk);
   if (c === cC && dirN && !dirS) r.puntos = Math.min(r.puntos, 75);
   if (c === cE) r.puntos = Math.min(r.puntos, 75);
+  aplicarNiebla(r, P, dia);
   return r;
 }
 
@@ -774,7 +789,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v3"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v4"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
