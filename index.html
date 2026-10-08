@@ -126,12 +126,12 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <div id="abajo">
 <section class="sec" id="concl"><h2>Conclusiones por especie</h2>
 <p class="nota-m">Salen de tus 27 días de pase (2019-2025). Para cada uno bajé el tiempo real de Landas, Burdeos, Poitiers, Urrugne y Andoain, y lo comparé con todos los días de las temporadas 2019-2025 para ver qué distingue a tus días buenos de los demás. Medias de la ventana: de 7 a 13 h para paloma y malviz, y la noche de 21 a 6 h para la becada. Lo de la red solo lo uso para contrastar.</p>
-<div class="esp"><h3>Paloma <span class="chip">12 días · confianza media</span></h3>
+<div class="esp"><h3>Paloma <span class="chip">13 días · confianza media</span></h3>
 <h4>Lo que se repite</h4>
 <ul>
-<li>Viento del ESE al SSO en Andoain y Urrugne (de 132° a 211°) en los 12 días salvo el 1/11/24 (132°, justo al límite). Esa dirección (120° a 215°) se da en el 50 % de los días de la temporada, así que es necesaria pero no basta. Lo mismo vale para el viento de la costa y del mar (Cantábrico): va del S o SSO en 8 de los 12 días, pero los 4 restantes son del E o del OSO, así que no mejora lo que ya dice Andoain y no lo puntúo aparte.</li>
-<li>En Landas el viento fue del ENE al SO (de 60° a 225°) en 10 de los 12 días. El 21/10/24 fue del E con muy poco viento, y el 29/10/23 y el 1/11/23 del OSO.</li>
-<li>Viento flojo en Landas, de 5 a 16 km/h. En Euskadi de 6 a 26 km/h con rachas de hasta 66, así que no hace falta calma: un sur moderado también vale.</li>
+<li>Viento del SE al S en Andoain y Urrugne los 13 días (de 136° a 200°). Esa dirección (135° a 205°) se da en el 49 % de los días de la temporada, así que es necesaria pero no basta. El viento de la costa y del mar (Cantábrico) va del S o SSO en 8 de los 13 días, pero los otros son del E o del OSO, así que no mejora lo que ya dice Andoain y no lo puntúo aparte.</li>
+<li>En Landas el viento fue del E al SO los 13 días (de 91° a 224°).</li>
+<li>Viento flojo en Landas, de 5 a 16 km/h. En Euskadi de 6 a 26 km/h con rachas de hasta 66, así que no hace falta calma: un sur moderado también vale. Casi en calma (menos de 5 km/h) puntúa menos.</li>
 <li>Aire templado en Landas, 9 °C o más los 12 días.</li>
 <li>Presión estable: el cambio en 24 h estuvo entre −3,9 y +1,1 hPa los 12 días. Sin frente fuerte ni subida rápida.</li>
 <li>Sin lluvia en 10 de los 12 días. El 1/11/23 cayeron 6,4 mm y pasó igual.</li>
@@ -153,7 +153,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <p>Calcula los dos patrones y se queda con el que más puntos da. Da más peso a tus 3 noches estrella (<span style="color:var(--media)">★</span> 20/11/19, 24/11/20 y 22/11/21), las de más becadas: frío en Francia, viento flojo del E, cielo cubierto y presión bajando 5 hPa o más. Una noche así llega a ALTA. Una noche fría y tranquila que no tiene la presión bajando ni el cielo cubierto se queda en MEDIA. El calendario llega hasta el 31 de diciembre.</p>
 <p class="nota-m">2020 fue tu mejor año de becada, de noviembre a enero. Sus dos noches (23 y 24/11/20) ya están. Si me das más fechas de ese año (diciembre y enero), puedo ver qué tuvo el tiempo de esa temporada. Todavía no he medido con qué frecuencia se da el patrón estrella en toda la temporada, para saber cuántos falsos avisos da.</p>
 <p class="nota-m">El 26/12/23 lo marcaste como posible movimiento local. En la tabla de «Tus días» sale aparte y no cuenta para el parecido.</p></div>
-<div class="esp"><h3>Malviz y zorzal <span class="chip">12 días · confianza media-baja</span></h3>
+<div class="esp"><h3>Malviz y zorzal <span class="chip">17 días · confianza media-baja</span></h3>
 <p class="nota-m">Los 6 días de antes más la semana del 23 al 28/10/22, que me dijiste que fue de pase masivo cada día (el 29 ya estaba).</p>
 <h4>Dos tipos de día</h4>
 <ul>
@@ -312,13 +312,13 @@ function evalPaloma(P, dia) {
   const L = S.landas, U = S.urrugne, A = S.andoain;
   const dE = dirComb(U, A), vE = (U.viento + A.viento)/2, rE = maxRacha(U, A);
   const txtR = rE == null ? "" : `, rachas hasta ${f0(rE)}`;
-  const fOk = vE >= 8 && vE <= 26 && (rE == null || rE <= 66), fMed = vE >= 4 && vE <= 32 && (rE == null || rE <= 75);
-  const ll = sumaLluvia(L, U, A), dEok = enSector(dE,120,215), dLok = enSector(L.dir,60,225);
+  const fOk = vE >= 5 && vE <= 26 && (rE == null || rE <= 66), fMed = vE >= 2 && vE <= 32 && (rE == null || rE <= 75);
+  const ll = sumaLluvia(L, U, A), dEok = enSector(dE,135,205), dLok = enSector(L.dir,90,225);
   const dpP = cambio24(P.landas, "pressure_msl", b);
   const c = [
-    crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°). Bueno: del ESE al SSO (120°-215°)`, dEok, 25),
-    crit(`Dirección del viento en Landas: ${rosa(L.dir)} (${f0(L.dir)}°). Bueno: del ENE al SO (60°-225°)`, dLok, 15),
-    crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento suave pero con algo de fuerza, 8-26 km/h y rachas ≤ 66 (parcial 4-32 y ≤ 75; con menos de 4 no hay viento que lleve a las palomas)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
+    crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°). Bueno: del SE al S (135°-205°)`, dEok, 25),
+    crit(`Dirección del viento en Landas: ${rosa(L.dir)} (${f0(L.dir)}°). Bueno: del E al SO (90°-225°)`, dLok, 15),
+    crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento suave pero con algo de fuerza, 5-26 km/h y rachas ≤ 66 (parcial 2-32 y ≤ 75; casi en calma no hay viento que lleve a las palomas)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
     crit(`FUERZA del viento en Landas ${f0(L.viento)} km/h. Bueno: ≤ 18 km/h (parcial ≤ 25)`, L.viento <= 18, 5, L.viento <= 18 ? 5 : (L.viento <= 25 ? 2 : 0)),
     crit(`Temperatura en Landas ${f1(L.temp)} °C. Buena: ≥ 9 (aire templado del sur)`, L.temp >= 9, 5),
     crit("Presión en Landas " + (dpP == null ? "sin dato" : `${sg1(dpP)} hPa en 24 h`) + ". Buena: estable, entre -5 y +2 (sin frente fuerte ni subida rápida)", dpP == null || (dpP >= -5 && dpP <= 2), 15),
@@ -329,7 +329,7 @@ function evalPaloma(P, dia) {
   const resumen = `viento Andoain ${rosa(dE)} ${f0(vE)} km/h, Landas ${rosa(L.dir)} ${f0(L.viento)} km/h, ${f0(L.presion)} hPa`;
   let nota = enC ? null : "Fuera del calendario habitual (10 oct - 30 nov)";
   const claveOk = dEok && dLok;
-  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (ESE-SSO en Andoain y ENE-SO en Landas): no pasa de 50.";
+  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (SE-S en Andoain y E-SO en Landas): no pasa de 50.";
   const r = cerrar(c, resumen, nota, enC ? undefined : false, claveOk);
   // la paloma no pasa con lluvia: tope duro según la lluvia en Euskadi (Andoain/Urrugne) y en Landas
   const llE = [A.lluvia, U.lluvia].filter(x => x != null), mE = llE.length ? Math.max(...llE) : null;
@@ -425,10 +425,23 @@ function evalMalviz(P, dia) {
     crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: ≤ 30 km/h y rachas ≤ 75`, fz, 10),
     cCal,
   ];
+  // patron claro y flojo del ESE (tu dia 1/11/24 ★): rara vez se da, solo un dia tuyo
+  const dirE2 = enSector(dE,100,160), solOk = A.sol != null && A.sol >= 3;
+  const cE = [
+    crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°). Bueno: del ESE al SE (100°-160°)`, dirE2, 30),
+    crit(`Sol en Andoain: ${A.sol == null ? "sin dato" : f1(A.sol) + " h"} en la ventana. Bueno: 3 h o más (día claro)`, solOk, 20),
+    crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento flojo, ≤ 10 km/h`, vE <= 10, 15),
+    crit(`Viento en Landas ${f0(L.viento)} km/h. Bueno: ≤ 12 km/h`, L.viento <= 12, 10),
+    crit("Lluvia en la ventana: " + (ll == null ? "sin dato" : f1(ll) + " mm") + ". Buena: ≤ 0,5 mm", ll == null || ll <= 0.5, 10),
+    cCal,
+  ];
+  const claveE = dirE2 && solOk && vE <= 10;
   const claveC = fina && (dirS || dirN);
   const sum = c => c.reduce((p,x)=>p+x.pts,0);
   let c, claveOk, patron, resumen;
-  if (sum(cC) > Math.max(sum(cA), sum(cB))) { c = cC; claveOk = claveC; patron = "Patrón día lluvioso (4 de tus días): lluvia fina y continua, cielo cubierto, poco viento en Francia" + (dirN && !dirS ? ". Con viento del N no lo has confirmado con ningún día: no pasa de 75" : "");
+  if (claveE && sum(cE) > Math.max(sum(cA), sum(cB), sum(cC))) { c = cE; claveOk = true; patron = "Patrón día claro con viento flojo del ESE (solo 1 día tuyo, el 1/11/24 ★: no pasa de 75)";
+    resumen = `sol ${A.sol == null ? "?" : f1(A.sol)} h, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
+  else if (sum(cC) > Math.max(sum(cA), sum(cB))) { c = cC; claveOk = claveC; patron = "Patrón día lluvioso (4 de tus días): lluvia fina y continua, cielo cubierto, poco viento en Francia" + (dirN && !dirS ? ". Con viento del N no lo has confirmado con ningún día: no pasa de 75" : "");
     resumen = `lluvia ${lluDia == null ? "?" : f1(lluDia)} mm, nubes ${f0(nFr)} %, viento Euskadi ${rosa(dE)} ${f0(vE)} km/h`; }
   else if (sum(cA) >= sum(cB)) { c = cA; claveOk = nubOk && dirOk; patron = "Patrón nublado y templado (6 de tus días)";
     resumen = `nubes ${f0(nubes)} %, ${f1(L.temp)} °C, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
@@ -439,6 +452,7 @@ function evalMalviz(P, dia) {
   if (!enC) nota += " Fuera del calendario habitual.";
   const r = cerrar(c, resumen, nota, enC, claveOk);
   if (c === cC && dirN && !dirS) r.puntos = Math.min(r.puntos, 75);
+  if (c === cE) r.puntos = Math.min(r.puntos, 75);
   return r;
 }
 
@@ -760,7 +774,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v1";
+const CLAVE_H = "pasa_hist_v3"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
