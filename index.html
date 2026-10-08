@@ -131,7 +131,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <ul>
 <li>Viento del SE al S en Andoain y Urrugne los 13 días (de 136° a 200°). Esa dirección (135° a 205°) se da en el 49 % de los días de la temporada, así que es necesaria pero no basta. El viento de la costa y del mar (Cantábrico) va del S o SSO en 8 de los 13 días, pero los otros son del E o del OSO, así que no mejora lo que ya dice Andoain y no lo puntúo aparte.</li>
 <li>En Landas el viento fue del E al SO los 13 días (de 91° a 224°).</li>
-<li>Viento flojo en Landas, de 5 a 16 km/h. En Euskadi de 6 a 26 km/h con rachas de hasta 66, así que no hace falta calma: un sur moderado también vale. Casi en calma (menos de 5 km/h) puntúa menos.</li>
+<li>Viento flojo en Landas, de 5 a 16 km/h. En Euskadi de 6 a 26 km/h con rachas de hasta 66, así que no hace falta calma: un sur moderado también vale. Casi en calma (menos de 4 km/h) puntúa menos.</li>
 <li>Aire templado en Landas, 10 °C o más los 13 días.</li>
 <li>Presión estable: el cambio en 24 h estuvo entre −3,9 y +1,1 hPa los 13 días. Sin frente fuerte ni subida rápida.</li>
 <li>Sin lluvia en 11 de los 13 días. El 1/11/23 llovió (11 mm entre Landas, Urrugne y Andoain en la ventana) y pasó igual: tú lo marcaste como excepción. Por eso la página limita la nota con lluvia (más de 1 mm en Euskadi no pasa de 50, y más de 3 mm no pasa de 30) y ese día sale BAJA en «Tus días».</li>
@@ -141,7 +141,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li><b>La presión alta o baja:</b> tus días van de 1000 a 1022 hPa y solo 7 de 13 pasan de 1017, igual que la mitad de los días de la temporada. Ya no puntúa el valor de la presión, solo que se mantenga estable.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div>
+<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50; hasta 10° fuera de esos límites puntúa la mitad y no pasa de 85, para no perder los días al borde) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div>
 <div class="esp"><h3>Becada <span class="chip">9 noches · confianza media-baja</span></h3>
 <h4>Dos tipos de noche</h4>
 <ul>
@@ -325,13 +325,13 @@ function evalPaloma(P, dia) {
   const L = S.landas, U = S.urrugne, A = S.andoain;
   const dE = dirComb(U, A), vE = (U.viento + A.viento)/2, rE = maxRacha(U, A);
   const txtR = rE == null ? "" : `, rachas hasta ${f0(rE)}`;
-  const fOk = vE >= 5 && vE <= 26 && (rE == null || rE <= 66), fMed = vE >= 2 && vE <= 32 && (rE == null || rE <= 75);
-  const ll = sumaLluvia(L, U, A), dEok = enSector(dE,135,205), dLok = enSector(L.dir,90,225);
+  const fOk = vE >= 4 && vE <= 26 && (rE == null || rE <= 66), fMed = vE >= 2 && vE <= 32 && (rE == null || rE <= 75);
+  const ll = sumaLluvia(L, U, A), dEok = enSector(dE,135,205), dLok = enSector(L.dir,90,225), dEcerca = enSector(dE,125,215), dLcerca = enSector(L.dir,80,235);
   const dpP = cambio24(P.landas, "pressure_msl", b);
   const c = [
-    crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°). Bueno: del SE al S (135°-205°)`, dEok, 25),
-    crit(`Dirección del viento en Landas: ${rosa(L.dir)} (${f0(L.dir)}°). Bueno: del E al SO (90°-225°)`, dLok, 15),
-    crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento suave pero con algo de fuerza, 5-26 km/h y rachas ≤ 66 (parcial 2-32 y ≤ 75; casi en calma no hay viento que lleve a las palomas)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
+    crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°). Bueno: del SE al S (135°-205°); hasta 10° fuera puntúa la mitad`, dEok, 25, dEok ? 25 : (dEcerca ? 12 : 0)),
+    crit(`Dirección del viento en Landas: ${rosa(L.dir)} (${f0(L.dir)}°). Bueno: del E al SO (90°-225°); hasta 10° fuera puntúa la mitad`, dLok, 15, dLok ? 15 : (dLcerca ? 7 : 0)),
+    crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento suave pero con algo de fuerza, 4-26 km/h y rachas ≤ 66 (parcial 2-32 y ≤ 75; casi en calma no hay viento que lleve a las palomas)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
     crit(`FUERZA del viento en Landas ${f0(L.viento)} km/h. Bueno: ≤ 18 km/h (parcial ≤ 25)`, L.viento <= 18, 5, L.viento <= 18 ? 5 : (L.viento <= 25 ? 2 : 0)),
     crit(`Temperatura en Landas ${f1(L.temp)} °C. Buena: ≥ 9 (aire templado del sur)`, L.temp >= 9, 5),
     crit("Presión en Landas " + (dpP == null ? "sin dato" : `${sg1(dpP)} hPa en 24 h`) + ". Buena: estable, entre -5 y +2 (sin frente fuerte ni subida rápida)", dpP == null || (dpP >= -5 && dpP <= 2), 15),
@@ -341,9 +341,11 @@ function evalPaloma(P, dia) {
   c.push(crit("Dentro del calendario (10 oct - 30 nov)", enC, 10));
   const resumen = `viento Andoain ${rosa(dE)} ${f0(vE)} km/h, Landas ${rosa(L.dir)} ${f0(L.viento)} km/h, ${f0(L.presion)} hPa`;
   let nota = enC ? null : "Fuera del calendario habitual (10 oct - 30 nov)";
-  const claveOk = dEok && dLok;
-  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (SE-S en Andoain y E-SO en Landas): no pasa de 50.";
+  const claveOk = (dEok || dEcerca) && (dLok || dLcerca);
+  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (SE-S en Andoain y E-SO en Landas, con 10° de margen): no pasa de 50.";
+  else if (!(dEok && dLok)) nota = (nota ? nota + " " : "") + "La dirección está al borde (a menos de 10° del límite): puntúa la mitad en ese criterio y no llega a ALTA.";
   const r = cerrar(c, resumen, nota, enC ? undefined : false, claveOk);
+  if (claveOk && !(dEok && dLok)) r.puntos = Math.min(r.puntos, 85);
   // la paloma no pasa con lluvia: tope duro según la lluvia en Euskadi (Andoain/Urrugne) y en Landas
   const llE = [A.lluvia, U.lluvia].filter(x => x != null), mE = llE.length ? Math.max(...llE) : null;
   const addN = t => { r.nota = (r.nota ? r.nota + " " : "") + t; };
@@ -789,7 +791,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v4"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v5"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
