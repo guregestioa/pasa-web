@@ -211,7 +211,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 </ul>
 <h4>Límites</h4>
 <ul>
-<li><b>Cómo entra el parecido:</b> primero mandan las reglas del tiempo. Si se cumplen, miro con qué días de pase se parece. Con un 70 % o más a un día, la nota sube y queda como mínimo en 85. A varios días, como mínimo 92. A un día ★, como mínimo 95 (97 si además se parece a otros). Si no llega al 70 % con ninguno, la nota no puede pasar de 89. Tus días buenos se parecen entre sí entre un 38 y un 76 %, así que muchos días buenos no llegarán al 70 % y se quedarán en MEDIA.</li>
+<li><b>Cómo entra el parecido:</b> primero mandan las reglas del tiempo. Si se cumplen, miro con qué días de pase se parece. Con un 70 % o más a un día, la nota sube y queda como mínimo en 85. A varios días, como mínimo 92. A un día ★, como mínimo 95 (97 si además se parece a otros). Si no llega al 70 % con ninguno, la nota tiene un tope que baja cuanto menos se parece: con un 40 % de parecido como mucho 73, con un 50 % 77, con un 60 % 82 y con un 69 % 86. Tus días buenos se parecen entre sí entre un 38 y un 76 %, así que muchos días buenos no llegarán al 70 % y se quedarán en MEDIA.</li>
 <li>Las reglas se ajustaron a tus propios días, así que acertar en ellos no prueba nada. Lo que sí indica algo es cuántos otros días las cumplen (21 % en paloma, 17 % en becada y 33 % en malviz para el nivel Alta, medido con las reglas actuales en las temporadas 2019-2025).</li>
 <li>No tengo días sin pase. Esos «otros días» pueden incluir días en que pasó y no lo anotaste, así que el porcentaje real de falsos avisos puede ser menor.</li>
 <li>Son datos de reanálisis. La previsión es de otro modelo y puede dar valores algo distintos, sobre todo a 3 días vista o más.</li>
@@ -602,7 +602,7 @@ function apoyoPar(sims, esc) {
   if (bestE >= U) { niv = "estrella"; if (n70 >= 2) { bono = 12; piso = 97; txt = "Se parece a una ★ y a otros días de pase"; } else { bono = 10; piso = 95; txt = "Se parece a un día ★"; } cap = 100; }
   else if (n70 >= 2) { niv = "multiple"; bono = 8; piso = 92; cap = 100; txt = "Se parece a varios días de pase"; }
   else if (best >= U) { niv = "fuerte"; bono = 6; piso = 85; cap = 97; txt = "Se parece a un día de pase"; }
-  else { niv = "sin"; bono = 0; piso = 0; cap = 89; txt = "No se parece con claridad (menos de un 70 %) a ningún día de pase"; }
+  else { niv = "sin"; bono = 0; piso = 0; cap = Math.min(86, Math.round(55 + 0.45*best)); txt = "No se parece con claridad (menos de un 70 %) a ningún día de pase"; }
   return {niv, bono, cap, piso, txt, n: n70, total: sims.length, best, bestE};
 }
 function puntosPar(r, ap) { if (!ap || r < UMBRAL.media) return r; return Math.min(ap.cap, Math.max(r + ap.bono, ap.piso)); }
@@ -840,7 +840,7 @@ function escalaPar(esp) {
 }
 function apoyoTxt(pa, esp) {
   const a = pa.apoyo; if (!a) return "Con pocos días de referencia no se puede medir el apoyo.";
-  const ef = a.niv === "sin" ? "no sube la nota y la deja en 89 como máximo" : `sube la nota (mínimo ${a.piso} si se cumplen las reglas)`;
+  const ef = a.niv === "sin" ? `no sube la nota y la limita a ${a.cap} como máximo (cuanto menos se parece, más baja el tope)` : `sube la nota (mínimo ${a.piso} si se cumplen las reglas)`;
   return `<b>${a.txt}:</b> ${a.n} de tus ${a.total} días buenos de ${NOMBRE[esp]} superan el 70 %; ${ef}. Primero mandan las reglas del tiempo; el parecido las confirma.`;
 }
 function parecidoHtml(pa, esp) {
