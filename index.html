@@ -100,6 +100,32 @@ td.f2{background:color-mix(in srgb,var(--acc) 55%,transparent);font-weight:600}
 td.hoy,th.hoy{box-shadow:inset 2px 0 0 var(--ink),inset -2px 0 0 var(--ink)}
 .fase{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
 .fase small{display:block;color:var(--muted);font-size:13px}
+.acc{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--surf)}
+.acc>summary{cursor:pointer;list-style:none;padding:13px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font:600 18px var(--f-num);letter-spacing:.03em;text-transform:uppercase;color:var(--acc)}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary::after{order:3;content:"";width:9px;height:9px;border-right:2px solid var(--acc);border-bottom:2px solid var(--acc);transform:rotate(45deg);margin-left:auto;transition:transform .15s}
+.acc[open]>summary::after{transform:rotate(-135deg)}
+.acc[open]>summary{border-bottom:1px solid var(--line)}
+.accb{padding:2px 14px 12px}
+.acc>summary .chip{order:2}
+/* parecido visual */
+.pv{overflow:hidden;margin:12px 0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surf)}
+.pv .pv-t{font:600 13px var(--f-num);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pv .pv-n{font:700 44px/1 var(--f-num);letter-spacing:.01em}
+.pv .pv-n small{font:600 18px var(--f-num);color:var(--muted)}
+.pv .pv-d{font-size:15px;margin:2px 0 8px}
+.pv .pv-bar{position:relative;height:14px;border-radius:99px;background:var(--line);overflow:hidden}
+.pv .pv-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--acc)}
+.pv .pv-esc{position:relative;height:30px;margin-top:2px;font-size:12px;color:var(--muted)}
+.pv .pv-esc b{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;font-weight:600}
+.pv .pv-esc b::before{content:"";display:block;width:2px;height:7px;background:var(--ink);margin:0 0 1px;opacity:.55;position:relative;left:var(--tl,0)}
+.pv.alto .pv-bar i{background:var(--alta)}
+.pv.medio .pv-bar i{background:var(--media)}
+.pv.bajo .pv-bar i{background:var(--muted)}
+.pv ul.pv-top{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:5px}
+.pv ul.pv-top li{display:grid;grid-template-columns:78px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.pv ul.pv-top .mini{height:7px;border-radius:99px;background:var(--line);overflow:hidden}
+.pv ul.pv-top .mini i{display:block;height:100%;background:var(--acc);border-radius:99px}
 .chip{align-self:start;font:600 13px var(--f-num);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
 .chip.on{background:var(--alta);border-color:var(--alta);color:var(--on)}
 ul.mods{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
@@ -126,7 +152,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <div id="abajo">
 <section class="sec" id="concl"><h2>Conclusiones por especie</h2>
 <p class="nota-m">Salen de tus 38 días de pase (2019-2025). Para cada uno bajé el tiempo real de Landas, Burdeos, Poitiers, Urrugne y Andoain, y lo comparé con todos los días de las temporadas 2019-2025 para ver qué distingue a tus días buenos de los demás. Medias de la ventana: de 7 a 13 h para paloma y malviz, y la noche de 21 a 6 h para la becada. Lo de la red solo lo uso para contrastar.</p>
-<div class="esp"><h3>Paloma <span class="chip">13 días · confianza media</span></h3>
+<details class="acc"><summary>Paloma <span class="chip">13 días · confianza media</span></summary><div class="accb">
 <h4>Lo que se repite</h4>
 <ul>
 <li>Viento del SE al S en Andoain y Urrugne los 13 días (de 136° a 200°). Esa dirección (135° a 205°) se da en el 49 % de los días de la temporada, así que es necesaria pero no basta. El viento de la costa y del mar (Cantábrico) va del S o SSO en 8 de los 13 días, pero los otros son del E o del OSO, así que no mejora lo que ya dice Andoain y no lo puntúo aparte.</li>
@@ -141,8 +167,8 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li><b>La presión alta o baja:</b> tus días van de 1000 a 1022 hPa y solo 7 de 13 pasan de 1017, igual que la mitad de los días de la temporada. Ya no puntúa el valor de la presión, solo que se mantenga estable.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50; hasta 10° fuera de esos límites puntúa la mitad y no pasa de 85, para no perder los días al borde) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div>
-<div class="esp"><h3>Becada <span class="chip">9 noches · confianza media-baja</span></h3>
+<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50; hasta 10° fuera de esos límites puntúa la mitad y no pasa de 85, para no perder los días al borde) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div></details>
+<details class="acc"><summary>Becada <span class="chip">9 noches · confianza media-baja</span></summary><div class="accb">
 <h4>Dos tipos de noche</h4>
 <ul>
 <li><b>Fría y tranquila (6 noches):</b> 20/11/19, 23/11/20, 24/11/20, 22/11/21, 2/12/22 y 26/12/23. De 2,7 a 6,4 °C de media en Francia, viento flojo (de 4 a 10 km/h) del NO al E en Landas. El 20/11/19, el 24/11/20 y el 22/11/21 la presión bajó de 5 a 8 hPa con cielo cubierto; el 23/11/20 fue anticiclón con 1029 hPa.</li>
@@ -152,8 +178,8 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <h4>Qué hace la página con esto</h4>
 <p>Calcula los dos patrones y se queda con el que más puntos da. Da más peso a tus 3 noches estrella (<span style="color:var(--media)">★</span> 20/11/19, 24/11/20 y 22/11/21), las de más becadas: frío en Francia, viento flojo del E, cielo cubierto y presión bajando 5 hPa o más. Una noche así llega a ALTA. Una noche fría y tranquila que no tiene la presión bajando ni el cielo cubierto se queda en MEDIA. El calendario llega hasta el 31 de diciembre.</p>
 <p class="nota-m">2020 fue tu mejor año de becada, de noviembre a enero. Sus dos noches (23 y 24/11/20) ya están. Si me das más fechas de ese año (diciembre y enero), puedo ver qué tuvo el tiempo de esa temporada. Todavía no he medido con qué frecuencia se da el patrón estrella en toda la temporada, para saber cuántos falsos avisos da.</p>
-<p class="nota-m">El 26/12/23 lo marcaste como posible movimiento local. En la tabla de «Tus días» sale aparte y no cuenta para el parecido.</p></div>
-<div class="esp"><h3>Malviz y zorzal <span class="chip">17 días · confianza media-baja</span></h3>
+<p class="nota-m">El 26/12/23 lo marcaste como posible movimiento local. En la tabla de «Tus días» sale aparte y no cuenta para el parecido.</p></div></details>
+<details class="acc"><summary>Malviz y zorzal <span class="chip">17 días · confianza media-baja</span></summary><div class="accb">
 <p class="nota-m">Tus 12 días de la lista más 5 días de la semana del 23 al 28/10/22 (23, 24, 26, 27 y 28) que me dijiste que fue de pase masivo cada día (el 25 y el 29 ya están en tu lista).</p>
 <h4>Dos tipos de día</h4>
 <ul>
@@ -175,8 +201,8 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li>El viento N-NE de la bibliografía no salió en ninguno de tus días, ni el frío. Esa regla ya no se usa.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Calcula los patrones y se queda con el que más puntos da. El de calor y viento del sur exige 16 °C o más en Landas y viento del SSE al OSO en Euskadi (sin eso no pasa de 50). La niebla por la mañana limita la nota a 50, igual que en la paloma. Tus 17 días tampoco tuvieron niebla: el 9/11/23 tuvo humedad del 99 %, pero con lluvia, que no cuento como niebla. Hay además un tercer patrón de día claro con viento flojo del ESE, que solo viene de tu día del 1/11/24 ★ y no pasa de 75. Con todos los patrones, 15 de tus 17 días sacan 90 o más (y 16 de 17 sacan 70 o más), frente al 33 % de los días de la temporada con 90 o más. Es la especie con más avisos: 1 de cada 3 días de la temporada sale ALTA. El segundo patrón sale de una sola semana, así que es el menos fiable.</p></div>
-<div class="esp"><h3>Para las tres especies</h3>
+<p>Calcula los patrones y se queda con el que más puntos da. El de calor y viento del sur exige 16 °C o más en Landas y viento del SSE al OSO en Euskadi (sin eso no pasa de 50). La niebla por la mañana limita la nota a 50, igual que en la paloma. Tus 17 días tampoco tuvieron niebla: el 9/11/23 tuvo humedad del 99 %, pero con lluvia, que no cuento como niebla. Hay además un tercer patrón de día claro con viento flojo del ESE, que solo viene de tu día del 1/11/24 ★ y no pasa de 75. Con todos los patrones, 15 de tus 17 días sacan 90 o más (y 16 de 17 sacan 70 o más), frente al 33 % de los días de la temporada con 90 o más. Es la especie con más avisos: 1 de cada 3 días de la temporada sale ALTA. El segundo patrón sale de una sola semana, así que es el menos fiable.</p></div></details>
+<details class="acc"><summary>Para las tres especies</summary><div class="accb">
 <ul>
 <li><b>Viento flojo en Landas:</b> casi todos los días buenos tienen 16 km/h o menos, pero en la temporada ocurre el 92 % de los días, así que no distingue nada.</li>
 <li><b>La dirección del viento manda en paloma y malviz:</b> sur-sureste. La presión no.</li>
@@ -185,34 +211,35 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 </ul>
 <h4>Límites</h4>
 <ul>
+<li><b>Cómo entra el parecido:</b> primero mandan las reglas del tiempo. Si se cumplen, miro con qué días de pase se parece. Con un 70 % o más a un día, la nota sube y queda como mínimo en 85. A varios días, como mínimo 92. A un día ★, como mínimo 95 (97 si además se parece a otros). Si no llega al 70 % con ninguno, la nota no puede pasar de 89. Tus días buenos se parecen entre sí entre un 38 y un 76 %, así que muchos días buenos no llegarán al 70 % y se quedarán en MEDIA.</li>
 <li>Las reglas se ajustaron a tus propios días, así que acertar en ellos no prueba nada. Lo que sí indica algo es cuántos otros días las cumplen (21 % en paloma, 17 % en becada y 33 % en malviz para el nivel Alta, medido con las reglas actuales en las temporadas 2019-2025).</li>
 <li>No tengo días sin pase. Esos «otros días» pueden incluir días en que pasó y no lo anotaste, así que el porcentaje real de falsos avisos puede ser menor.</li>
 <li>Son datos de reanálisis. La previsión es de otro modelo y puede dar valores algo distintos, sobre todo a 3 días vista o más.</li>
-</ul></div>
+</ul></div></details>
 </section>
 <section class="sec" id="mig"><h2>Migración de la becada: cómo va</h2><div id="migc"><p class="sub">Cargando…</p></div></section>
 <section class="sec" id="base"><h2>En qué me baso</h2>
 <p class="nota-m">Resumen de las fuentes que he usado para las reglas y para este panel. Lo que está marcado como «sin contrastar» no está comprobado con tus fechas.</p>
-<h3>Palomas torcaces</h3>
+<details class="acc"><summary>Palomas torcaces</summary><div class="accb">
 <ul>
 <li><b>Tus 13 días de pase de paloma</b> (2022-2025), comparados con el tiempo de esos días y con todos los días de las temporadas 2019-2025. De ahí salen la dirección del viento SE-S, la fuerza, la temperatura, la presión estable y la lluvia de las reglas.</li>
 <li><b>Prensa y foros de caza del País Vasco y Navarra</b> (<a href="https://www.ondavasca.com/los-ultimos-dias-ha-entrado-bastante-paloma-pero-ha-pasado-muy-alta/" target="_blank" rel="noopener">Onda Vasca</a>, <a href="https://www.noticiasdenavarra.com/cultura/2022/10/17/pasa-paloma-modalidad-caza-tradicional-6123754.html" target="_blank" rel="noopener">Noticias de Navarra</a>): con niebla, lluvia y mal tiempo las palomas se aplanan y no salen; con viento norte cruzan por Etxalar y Valcarlos; con viento sur van por la costa. Pasan cada vez más altas.</li>
 <li><b>Conteos del Pirineo</b> (<a href="https://www.forestales.net/revistas/articulos/11/completo/la_migracion_postnupcial_de_palomas_torcaces_y_otr.pdf" target="_blank" rel="noopener">estudio en Montes</a>, <a href="https://aemetblog.es/2017/03/16/lindus-2-la-observacion-de-las-aves-migratorias-en-el-pirineo/" target="_blank" rel="noopener">Lindus, blog de AEMET</a>, <a href="https://www.trektellen.nl/site/totals/2133/2020" target="_blank" rel="noopener">Organbidexka en Trektellen</a>): el pico suele estar entre el 19 y el 29 de octubre. La mediana en Suecia es el 19 de octubre y en el Pirineo el 27, unos 10 a 12 días después. En 2011 el máximo llegó el 9 de noviembre. De estas fuentes uso las fechas para el calendario. No dan reglas de viento ni presión.</li>
 </ul>
-<h3>Zorzales y malviz</h3>
+</div></details><details class="acc"><summary>Zorzales y malviz</summary><div class="accb">
 <ul>
 <li><b>Tus 17 días de pase de malviz</b> (2022-2025): cielo cubierto y templado con viento del S al SO, calor y viento del sur la semana del 23 al 29/10/22, días de lluvia fina continua, y un día claro con viento flojo del ESE (1/11/24).</li>
 <li><b>Bibliografía y prensa de caza</b>: viento N-NE y frío. No sale en ninguno de tus días, así que ya no se usa.</li>
 <li>No he encontrado conteos abiertos de zorzales con tiempo asociado que permitan afinar más.</li>
 </ul>
-<h3>Becadas</h3>
+</div></details><details class="acc"><summary>Becadas</summary><div class="accb">
 <ul>
 <li><b>Tus 9 noches de entrada de becada</b> (2019-2023) y el tiempo en Francia esas noches. De ahí salen los dos patrones: noche fría y tranquila con viento del E, y noche templada con lluvia y viento del SO.</li>
 <li><b>CCBP y Scolopax Sin Fronteras</b> (<a href="https://www.ccbp.org/es" target="_blank" rel="noopener">ccbp.org</a>, <a href="https://rtvs1.ccbp.org" target="_blank" rel="noopener">rtvs1.ccbp.org</a>) y la <b>Casa de la Becada</b> (Garralda): llegan con frío en el origen, viento N-NE, noches tranquilas y secas, y suelo húmedo sin helar. El pico en Euskadi está entre la última semana de noviembre y principios de diciembre, y el paso termina hacia el 15 de diciembre.</li>
 <li><b>Seguimiento por satélite</b> (<a href="https://gwct.org.uk/research/scientific-publications/2020/hoodless2020/" target="_blank" rel="noopener">Hoodless y otros, 2020</a>): las becadas que invernan en Gran Bretaña e Irlanda salen sobre todo del noroeste de Rusia, de Escandinavia y de Finlandia. La salida media es el 10 de octubre y la llegada máxima es en noviembre.</li>
 <li><b>Federaciones de caza y Réseau Bécasse de Francia</b> (<a href="https://www.chasse-nature-occitanie.fr/aveyron/ma-fede/documents/Info-Mig-8-Janv-2026-trA-s-com.pdf" target="_blank" rel="noopener">Info Mig, Aveyron</a>, <a href="https://ofb.gouv.fr/doc/becasse-flash-info-n-1-saison-20232024" target="_blank" rel="noopener">Bécasse Flash Info, OFB</a>): primeras llegadas a mediados de octubre y pico en la primera quincena de noviembre en Francia. Las becadas aguantan entre 3 y 5 días sin comer, y hasta un 25 % más de 9 días. Con una ola de frío fuerte pueden volar hasta 700 km hacia zonas más cálidas.</li>
 </ul>
-<h3>Luna</h3>
+</div></details><details class="acc"><summary>Luna</summary><div class="accb">
 <ul>
 <li><b>Tus 38 días</b>: calculada la fase y la iluminación de cada fecha. No sale ningún patrón en la paloma (hay días de luna nueva y de llena). En la becada y el malviz hay fases de todo tipo y tampoco sale nada.</li>
 <li><b>Becada europea</b>: el <a href="https://gwct.org.uk/blogs/woodcock-watch-blog/2015/november/woodcock-ringing-and-the-autumn-migration/" target="_blank" rel="noopener">GWCT</a> dice que la luna llena de noviembre coincide con su llegada por tradición, pero que no cree que influya mucho. Muchas aves llegaron antes, con luna nueva en octubre. Un <a href="https://ir.lib.uth.gr/xmlui/handle/11615/26306" target="_blank" rel="noopener">estudio de 12 años en Macedonia</a> probó la fase lunar entre otros factores, y concluye que influyen la presión, el viento y la lluvia.</li>
@@ -220,13 +247,13 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li>De la paloma y de los zorzales no he encontrado estudios sobre la luna.</li>
 <li>La luna sale en la página solo como dato informativo, no cuenta en la puntuación.</li>
 </ul>
-<h3>Lo que no he podido hacer</h3>
+</div></details><details class="acc"><summary>Lo que no he podido hacer</summary><div class="accb">
 <ul>
 <li>No he encontrado conteos diarios abiertos de becadas del Báltico. Por eso el panel de la becada usa el tiempo a lo largo de la ruta como indicador, no conteos reales.</li>
 <li>Euskalmet, AEMET, Meteoconsult y Meteoblue no dejan leer sus datos desde una página web. Por eso solo hay enlaces.</li>
 <li>Sin días de control en los que no pasó nada no puedo calcular los falsos avisos reales, solo compararlos con todos los días de la temporada.</li>
 </ul>
-</section>
+</div></details></section>
 </div>
 <p class="pie">Datos de Open-Meteo (Landas, Burdeos, Poitiers, Urrugne, Andoain). Las reglas salen de tus días de pase; son orientativas. Las previsiones a 3 días o más fallan más.</p>
 
@@ -501,11 +528,16 @@ function parecido(f1_, f2_) {
 }
 function mejorParecido(P, esp, dia, refs) {
   const f = rasgos(P, esp, dia); if (!f) return null;
-  let m = null;
+  const todos_ = [];
   for (const r of refs) { if (r.esp !== esp) continue; const v = parecido(f, r.f);
-    // los días especialmente buenos (★) pesan más al elegir con cuál se compara
-    if (v != null && (m == null || v*(r.estrella ? 1.1 : 1) > m.pw)) m = {pct: v, pw: v*(r.estrella ? 1.1 : 1), fecha: r.fecha, g: r.f, estrella: !!r.estrella}; }
-  if (m) { m.f = f; m.coin = coincidencias(f, m.g); }
+    if (v != null) todos_.push({pct: v, pw: v*(r.estrella ? 1.4 : 1), fecha: r.fecha, g: r.f, estrella: !!r.estrella}); }
+  if (!todos_.length) return null;
+  // los días especialmente buenos (★) pesan más al elegir con cuál se compara
+  todos_.sort((a, b) => b.pw - a.pw);
+  const m = {...todos_[0], f};
+  m.coin = coincidencias(f, m.g);
+  m.sims = todos_.map(x => ({pct: x.pct, estrella: x.estrella}));
+  m.top = todos_.slice(0, 3).map(x => ({pct: x.pct, fecha: x.fecha, estrella: x.estrella}));
   return m;
 }
 const LUG = {landas:"Landas", burdeos:"Burdeos", poitiers:"Poitiers", andoain:"Andoain"};
@@ -543,6 +575,37 @@ function lluviaSolDia(P, dia) {
 }
 const nivel = p => p >= UMBRAL.alta ? "alta" : (p >= UMBRAL.media ? "media" : "baja");
 
+// ---- apoyo por parecido: cuánto respaldo tiene un día en tus días buenos (solo puede BAJAR la nota) ----
+const _escCache = new WeakMap();
+function escalaApoyo(refs, esp) {
+  if (!refs) return null;
+  let m = _escCache.get(refs); if (!m) { m = {}; _escCache.set(refs, m); }
+  if (m[esp] !== undefined) return m[esp];
+  const R = refs.filter(x => x.esp === esp), best = [], par = [];
+  R.forEach((x, i) => { let b = null; R.forEach((y, j) => { if (i === j) return; const q = parecido(x.f, y.f); if (q == null) return;
+    if (j > i) par.push(q); if (b == null || q > b) b = q; }); if (b != null) best.push(b); });
+  if (best.length < 4) { m[esp] = null; return null; }
+  best.sort((a, b) => a - b); par.sort((a, b) => a - b);
+  const tBest = best[Math.floor(best.length*0.3)], tPair = par[Math.floor(par.length/2)];
+  const cnt = []; R.forEach((x, i) => { let n = 0; R.forEach((y, j) => { if (i !== j) { const q = parecido(x.f, y.f); if (q != null && q >= tPair) n++; } }); cnt.push(n); });
+  cnt.sort((a, b) => a - b);
+  const need = cnt[Math.floor(cnt.length/2)] >= 2 ? 2 : 1;
+  return (m[esp] = {tBest, tPair, need, n: R.length});
+}
+// sims: [{pct, estrella}] del día frente a cada día bueno de la especie.
+// Primero mandan las reglas del tiempo; el parecido (umbral 70 %) las confirma y sube la nota, y más si es a un día ★.
+function apoyoPar(sims, esc) {
+  if (!sims || !sims.length) return null;
+  const U = 70; let best = 0, bestE = 0, n70 = 0;
+  sims.forEach(s => { if (s.pct > best) best = s.pct; if (s.estrella && s.pct > bestE) bestE = s.pct; if (s.pct >= U) n70++; });
+  let niv, bono, cap, piso, txt;
+  if (bestE >= U) { niv = "estrella"; if (n70 >= 2) { bono = 12; piso = 97; txt = "Se parece a una ★ y a otros días de pase"; } else { bono = 10; piso = 95; txt = "Se parece a un día ★"; } cap = 100; }
+  else if (n70 >= 2) { niv = "multiple"; bono = 8; piso = 92; cap = 100; txt = "Se parece a varios días de pase"; }
+  else if (best >= U) { niv = "fuerte"; bono = 6; piso = 85; cap = 97; txt = "Se parece a un día de pase"; }
+  else { niv = "sin"; bono = 0; piso = 0; cap = 89; txt = "No se parece con claridad (menos de un 70 %) a ningún día de pase"; }
+  return {niv, bono, cap, piso, txt, n: n70, total: sims.length, best, bestE};
+}
+function puntosPar(r, ap) { if (!ap || r < UMBRAL.media) return r; return Math.min(ap.cap, Math.max(r + ap.bono, ap.piso)); }
 function analizar(P, hoy, ahora, nDias, refs) {
   const fun = {paloma:[evalPaloma, d => hh(d,13)], becada:[evalBecada, d => hh(d+DIA,6)], malviz:[evalMalviz, d => hh(d,13)]};
   const res = [];
@@ -555,6 +618,8 @@ function analizar(P, hoy, ahora, nDias, refs) {
       if (r) {
         r.nivel = nivel(r.puntos);
         r.parecido = refs && refs.length ? mejorParecido(P, e, dia, refs) : null;
+        if (r.parecido) { const ap = apoyoPar(r.parecido.sims, escalaApoyo(refs, e)); r.parecido.apoyo = ap;
+          if (ap) { const q = puntosPar(r.puntos, ap); if (q !== r.puntos) { r.puntosOrig = r.puntos; r.puntos = q; r.nivel = nivel(q); } } }
       }
       fila[e] = r;
     }
@@ -562,7 +627,7 @@ function analizar(P, hoy, ahora, nDias, refs) {
   }
   return res;
 }
-if (typeof module !== "undefined") module.exports = {ventana, lluviaSolDia, construir, evalPaloma, evalBecada, evalMalviz, rasgos, parecido, analizar, nivel, DIA, HORA};
+if (typeof module !== "undefined") module.exports = {ventana, lluviaSolDia, construir, evalPaloma, evalBecada, evalMalviz, rasgos, parecido, analizar, nivel, escalaApoyo, apoyoPar, puntosPar, DIA, HORA};
 
 const REFS = [{"esp": "becada", "fecha": "2019-11-20", "f": {"landas.presion": 1013.86, "landas.temp": 2.97, "landas.viento": 10.98, "landas.dir": 104.549, "landas.nubes": 96.4, "burdeos.presion": 1014.02, "burdeos.temp": 2.35, "burdeos.viento": 8.44, "burdeos.dir": 127.672, "burdeos.nubes": 96.3, "poitiers.presion": 1015.49, "poitiers.temp": 2.75, "poitiers.viento": 9.06, "poitiers.dir": 91.909, "poitiers.nubes": 90.8, "andoain.presion": 1011.94, "andoain.temp": 7.72, "andoain.viento": 13.75, "andoain.dir": 170.627, "andoain.nubes": 99.9, "landas.dp": -7.7}}, {"esp": "becada", "fecha": "2020-11-23", "f": {"landas.presion": 1029.05, "landas.temp": 2.99, "landas.viento": 3.26, "landas.dir": 116.296, "landas.nubes": 0.6, "burdeos.presion": 1029.0, "burdeos.temp": 6.2, "burdeos.viento": 3.79, "burdeos.dir": 127.61, "burdeos.nubes": 0.0, "poitiers.presion": 1029.35, "poitiers.temp": 3.05, "poitiers.viento": 5.77, "poitiers.dir": 7.747, "poitiers.nubes": 5.7, "andoain.presion": 1029.1, "andoain.temp": 8.16, "andoain.viento": 8.03, "andoain.dir": 186.175, "andoain.nubes": 16.1, "landas.dp": 1.4}}, {"esp": "becada", "fecha": "2020-11-24", "f": {"landas.presion": 1026.14, "landas.temp": 4.77, "landas.viento": 9.17, "landas.dir": 94.224, "landas.nubes": 96.3, "burdeos.presion": 1026.28, "burdeos.temp": 4.24, "burdeos.viento": 8.7, "burdeos.dir": 121.418, "burdeos.nubes": 97.5, "poitiers.presion": 1027.14, "poitiers.temp": 2.82, "poitiers.viento": 7.91, "poitiers.dir": 96.08, "poitiers.nubes": 53.7, "andoain.presion": 1024.84, "andoain.temp": 7.95, "andoain.viento": 10.52, "andoain.dir": 174.512, "andoain.nubes": 95.2, "landas.dp": -6.0}}, {"esp": "becada", "fecha": "2021-11-22", "f": {"landas.presion": 1012.7, "landas.temp": 6.61, "landas.viento": 6.65, "landas.dir": 70.907, "landas.nubes": 89.9, "burdeos.presion": 1012.79, "burdeos.temp": 6.44, "burdeos.viento": 5.79, "burdeos.dir": 95.217, "burdeos.nubes": 98.8, "poitiers.presion": 1014.45, "poitiers.temp": 6.21, "poitiers.viento": 14.13, "poitiers.dir": 29.919, "poitiers.nubes": 100.0, "andoain.presion": 1013.07, "andoain.temp": 9.28, "andoain.viento": 10.74, "andoain.dir": 262.432, "andoain.nubes": 94.0, "landas.dp": -5.3}}, {"esp": "paloma", "fecha": "2022-10-16", "f": {"landas.presion": 1013.114, "landas.temp": 18.214, "landas.viento": 7.143, "landas.dir": 116.696, "landas.nubes": 33.143, "burdeos.presion": 1012.543, "burdeos.temp": 18.586, "burdeos.viento": 10.786, "burdeos.dir": 131.73, "burdeos.nubes": 72.571, "andoain.presion": 1012.129, "andoain.temp": 21.743, "andoain.viento": 19.657, "andoain.dir": 168.784, "andoain.nubes": 60.571, "landas.dp": -1.5}}, {"esp": "paloma", "fecha": "2022-10-18", "f": {"landas.presion": 1022.243, "landas.temp": 19.9, "landas.viento": 11.314, "landas.dir": 101.289, "landas.nubes": 13.143, "burdeos.presion": 1022.571, "burdeos.temp": 19.8, "burdeos.viento": 13.386, "burdeos.dir": 120.473, "burdeos.nubes": 31.0, "andoain.presion": 1020.814, "andoain.temp": 22.843, "andoain.viento": 22.557, "andoain.dir": 164.705, "andoain.nubes": 11.714, "landas.dp": 1.1}}, {"esp": "paloma", "fecha": "2022-10-25", "f": {"landas.presion": 1014.071, "landas.temp": 18.614, "landas.viento": 11.9, "landas.dir": 121.503, "landas.nubes": 97.286, "burdeos.presion": 1014.157, "burdeos.temp": 16.529, "burdeos.viento": 14.114, "burdeos.dir": 130.903, "burdeos.nubes": 98.571, "andoain.presion": 1012.486, "andoain.temp": 20.757, "andoain.viento": 18.786, "andoain.dir": 167.428, "andoain.nubes": 100.0, "landas.dp": -3.4}}, {"esp": "malviz", "fecha": "2022-10-29", "f": {"landas.presion": 1017.057, "landas.temp": 19.229, "landas.viento": 6.671, "landas.dir": 85.876, "landas.nubes": 99.857, "burdeos.presion": 1017.029, "burdeos.temp": 18.9, "burdeos.viento": 11.2, "burdeos.dir": 135.904, "burdeos.nubes": 96.0, "andoain.presion": 1016.5, "andoain.temp": 22.371, "andoain.viento": 26.029, "andoain.dir": 165.834, "andoain.nubes": 100.0, "landas.dp": -4.7}}, {"esp": "paloma", "fecha": "2022-11-07", "f": {"landas.presion": 1018.0, "landas.temp": 11.643, "landas.viento": 7.071, "landas.dir": 126.63, "landas.nubes": 0.0, "burdeos.presion": 1017.671, "burdeos.temp": 12.2, "burdeos.viento": 10.286, "burdeos.dir": 163.706, "burdeos.nubes": 10.0, "andoain.presion": 1017.043, "andoain.temp": 14.557, "andoain.viento": 11.243, "andoain.dir": 180.497, "andoain.nubes": 9.571, "landas.dp": 1.0}}, {"esp": "paloma", "fecha": "2023-10-28", "f": {"landas.presion": 1003.914, "landas.temp": 15.186, "landas.viento": 13.214, "landas.dir": 204.398, "landas.nubes": 69.143, "burdeos.presion": 1001.8, "burdeos.temp": 15.414, "burdeos.viento": 20.6, "burdeos.dir": 195.696, "burdeos.nubes": 99.571, "andoain.presion": 1003.243, "andoain.temp": 17.943, "andoain.viento": 25.757, "andoain.dir": 193.323, "andoain.nubes": 47.571, "landas.dp": -1.2}}, {"esp": "paloma", "fecha": "2023-11-01", "f": {"landas.presion": 1008.7, "landas.temp": 12.386, "landas.viento": 16.229, "landas.dir": 224.186, "landas.nubes": 93.286, "burdeos.presion": 1006.657, "burdeos.temp": 13.686, "burdeos.viento": 23.714, "burdeos.dir": 224.947, "burdeos.nubes": 73.857, "andoain.presion": 1009.757, "andoain.temp": 14.171, "andoain.viento": 15.414, "andoain.dir": 199.969, "andoain.nubes": 88.429, "landas.dp": -3.9}}, {"esp": "malviz", "fecha": "2023-11-09", "f": {"landas.presion": 1015.443, "landas.temp": 11.757, "landas.viento": 13.357, "landas.dir": 250.297, "landas.nubes": 89.857, "burdeos.presion": 1013.6, "burdeos.temp": 12.129, "burdeos.viento": 16.171, "burdeos.dir": 254.334, "burdeos.nubes": 66.429, "andoain.presion": 1017.086, "andoain.temp": 12.343, "andoain.viento": 11.943, "andoain.dir": 247.508, "andoain.nubes": 72.714, "landas.dp": -4.0}}, {"esp": "paloma", "fecha": "2024-10-21", "f": {"landas.presion": 1021.843, "landas.temp": 16.586, "landas.viento": 5.429, "landas.dir": 90.872, "landas.nubes": 0.0, "burdeos.presion": 1021.943, "burdeos.temp": 16.186, "burdeos.viento": 8.614, "burdeos.dir": 141.205, "burdeos.nubes": 0.0, "andoain.presion": 1021.414, "andoain.temp": 19.886, "andoain.viento": 14.486, "andoain.dir": 195.596, "andoain.nubes": 0.0, "landas.dp": 0.6}}, {"esp": "paloma", "fecha": "2024-11-01", "f": {"landas.presion": 1022.086, "landas.temp": 13.914, "landas.viento": 5.671, "landas.dir": 98.26, "landas.nubes": 100.0, "burdeos.presion": 1022.471, "burdeos.temp": 14.014, "burdeos.viento": 8.071, "burdeos.dir": 94.221, "burdeos.nubes": 0.0, "andoain.presion": 1020.829, "andoain.temp": 17.314, "andoain.viento": 5.1, "andoain.dir": 133.06, "andoain.nubes": 26.571, "landas.dp": 0.1}}].map(r => ({...r, fecha: r.fecha}));
 const TABLA = [{"fecha": "2019-11-20", "esp": "becada", "l0": 1018.1, "l1": 1009.6, "a0": 1017.0, "a1": 1008.2}, {"fecha": "2020-11-23", "esp": "becada", "l0": 1028.2, "l1": 1028.8, "a0": 1027.3, "a1": 1028.5}, {"fecha": "2020-11-24", "esp": "becada", "l0": 1028.8, "l1": 1021.5, "a0": 1028.5, "a1": 1020.5}, {"fecha": "2021-11-22", "esp": "becada", "l0": 1015.5, "l1": 1013.8, "a0": 1016.5, "a1": 1013.3}, {"fecha": "2022-10-16", "esp": "paloma", "l0": 1014.6, "l1": 1012.9, "a0": 1014.3, "a1": 1012.3}, {"fecha": "2022-10-18", "esp": "paloma", "l0": 1019.4, "l1": 1021.2, "a0": 1018.7, "a1": 1020.1}, {"fecha": "2022-10-25", "esp": "paloma", "l0": 1015.3, "l1": 1013.8, "a0": 1015.3, "a1": 1012.9}, {"fecha": "2022-10-29", "esp": "malviz", "l0": 1019.8, "l1": 1017.1, "a0": 1019.1, "a1": 1016.4}, {"fecha": "2022-11-07", "esp": "paloma", "l0": 1017.3, "l1": 1016.5, "a0": 1017.1, "a1": 1015.6}, {"fecha": "2023-10-28", "esp": "paloma", "l0": 1004.8, "l1": 1003.1, "a0": 1005.3, "a1": 1002.6}, {"fecha": "2023-11-01", "esp": "paloma", "l0": 1012.6, "l1": 1008.3, "a0": 1012.6, "a1": 1007.9}, {"fecha": "2023-11-09", "esp": "malviz", "l0": 1019.4, "l1": 1015.0, "a0": 1019.1, "a1": 1016.3}, {"fecha": "2024-10-21", "esp": "paloma", "l0": 1021.1, "l1": 1022.9, "a0": 1020.5, "a1": 1023.2}, {"fecha": "2024-11-01", "esp": "paloma", "l0": 1021.5, "l1": 1021.7, "a0": 1020.8, "a1": 1020.8}];
@@ -757,20 +822,45 @@ function detalle() {
   const f = RES[SEL.k], r = f[SEL.e];
   $("det").innerHTML = `<section class="det"><h2>${NOMBRE[SEL.e]} · ${cuando(f, SEL.e)}</h2>` +
     `<div><b>${r.puntos}/100 ${r.nivel.toUpperCase()}</b> · ${esc(r.resumen)}</div>` +
+    (r.parecido ? parecidoHtml(r.parecido, SEL.e) : "") +
     (r.nota ? `<p class="nota">${esc(r.nota)}</p>` : `<p class="nota"></p>`) +
     `<ul class="cr">` + r.criterios.map(x => `<li><span class="m ${x.ok ? "si" : "no"}">${x.ok ? "✔" : "✘"}</span><span>${esc(x.texto)}</span><span class="pt">${x.pts}/${x.max}</span></li>`).join("") + `</ul>` +
     contrasteHtml(r) +
     ventanaClima(SEL.e, f.dia) +
     `<div class="par">Luna ${SEL.e === "becada" ? "esa noche" : "ese día"}: ${lunaTxt(lunaDe(f.dia, SEL.e))}. <span class="sub">Solo informativa, no cuenta en la puntuación.</span></div>` +
-    (r.parecido ? parecidoHtml(r.parecido) : "") +
+    
     `</section>`;
 }
-function parecidoHtml(pa) {
-  const c = pa.coin || {si: [], no: []};
+// escala de referencia: cuánto se parecen entre sí tus propios días buenos de cada especie
+function escalaPar(esp) {
+  const R = REFS_F.filter(x => x.esp === esp), v = [];
+  R.forEach(x => { let m = null; R.forEach(y => { if (y === x) return; const q = parecido(x.f, y.f); if (q != null && (m == null || q > m)) m = q; }); if (m != null) v.push(m); });
+  if (v.length < 3) return null; v.sort((a, b) => a - b);
+  return {med: v[Math.floor(v.length/2)], max: v[v.length-1], n: v.length};
+}
+function apoyoTxt(pa, esp) {
+  const a = pa.apoyo; if (!a) return "Con pocos días de referencia no se puede medir el apoyo.";
+  const ef = a.niv === "sin" ? "no sube la nota y la deja en 89 como máximo" : `sube la nota (mínimo ${a.piso} si se cumplen las reglas)`;
+  return `<b>${a.txt}:</b> ${a.n} de tus ${a.total} días buenos de ${NOMBRE[esp]} superan el 70 %; ${ef}. Primero mandan las reglas del tiempo; el parecido las confirma.`;
+}
+function parecidoHtml(pa, esp) {
+  const c = pa.coin || {si: [], no: []}, pct = Math.round(pa.pct), esc_ = escalaPar(esp);
+  let cls = "bajo", etq = "Poco parecido a tus días buenos";
+  if (esc_) { if (pa.pct >= 70) { cls = "alto"; etq = "Muy parecido a tus días buenos"; } else if (pa.pct >= 55) { cls = "medio"; etq = "Bastante parecido a tus días buenos"; } }
+  else if (pa.pct >= 65) { cls = "alto"; etq = "Muy parecido a tus días buenos"; } else if (pa.pct >= 50) { cls = "medio"; etq = "Bastante parecido a tus días buenos"; }
+  const mx = esc_ ? Math.min(100, Math.max(0, esc_.med)) : 0, tf = mx > 62 ? "translateX(-100%)" : (mx < 38 ? "translateX(0)" : "translateX(-50%)");
+  const marc = esc_ ? `<div class="pv-esc"><b style="left:${mx}%;transform:${tf}">típico entre tus días buenos: ${Math.round(esc_.med)} %</b></div>` : `<div class="pv-esc"></div>`;
+  const top = (pa.top || []).map(x => `<li><span>${fechaCorta(x.fecha)}${x.estrella ? ' <span style="color:var(--media)">★</span>' : ""}</span><span class="mini"><i style="width:${Math.round(x.pct)}%"></i></span><b>${Math.round(x.pct)} %</b></li>`).join("");
   const li = (a, ic) => a.map(x => `<li>${ic} ${esc(x.texto)}: hoy <b>${esc(x.hoy)}</b>, ese día ${esc(x.ref)}</li>`).join("");
-  return `<div class="par">Se parece un <b>${pa.pct.toFixed(0)} %</b> a tu día de pase del <b>${fechaCorta(pa.fecha)}</b>${pa.estrella ? ' <span style="color:var(--media)">★</span> (uno de tus días especialmente buenos)' : ""}. Es solo orientativo: no cambia el nivel.` +
-    (c.si.length ? `<div><b>Coincide en:</b></div><ul class="cr" style="list-style:none;padding-left:0;margin:4px 0">${li(c.si.slice(0,6), "✔")}</ul>` : "") +
-    (c.no.length ? `<div><b>Se distingue en:</b></div><ul class="cr" style="list-style:none;padding-left:0;margin:4px 0">${li(c.no.slice(0,3), "✘")}</ul>` : "") + `</div>`;
+  return `<div class="pv ${cls}"><div class="pv-t">Parecido a tus días buenos de ${NOMBRE[esp]}</div>` +
+    `<div class="pv-n">${pct}<small> %</small></div>` +
+    `<div class="pv-d"><b>${etq}.</b> El más parecido es el <b>${fechaCorta(pa.fecha)}</b>${pa.estrella ? ' <span style="color:var(--media)">★</span> (uno de tus días especialmente buenos)' : ""}.</div>` +
+    `<div class="pv-bar" role="img" aria-label="Parecido ${pct} %"><i style="width:${pct}%"></i></div>${marc}` +
+    (top ? `<ul class="pv-top">${top}</ul>` : "") +
+    `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;font-size:14px">En qué coincide y en qué no</summary>` +
+    (c.si.length ? `<div style="margin-top:6px"><b>Coincide en:</b></div><ul class="cr" style="list-style:none;padding-left:0;margin:4px 0">${li(c.si.slice(0,6), "✔")}</ul>` : "") +
+    (c.no.length ? `<div><b>Se distingue en:</b></div><ul class="cr" style="list-style:none;padding-left:0;margin:4px 0">${li(c.no.slice(0,3), "✘")}</ul>` : "") +
+    `</details><div class="sub" style="font-size:12px;margin-top:6px">${apoyoTxt(pa, esp)}</div></div>`;
 }
 function contrasteHtml(r) {
   const cs = consenso(r); if (!cs) return "";
@@ -791,7 +881,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v5"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v8"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
@@ -850,6 +940,15 @@ function cargarHistoricos() {
   })();
   return HIST_CARGANDO;
 }
+function ptsHist(x) { const d = DATOS[kH(x)], ap = apoyoHist(x); return puntosPar(d.pts, ap); }
+function apoyoHist(x) {
+  const d = DATOS[kH(x)]; if (!d || !d.f || x.local) return null;
+  const sims = [];
+  HIST.forEach(y => { if (y.esp !== x.esp || y.fecha === x.fecha || y.local) return; const e = DATOS[kH(y)]; if (!e || !e.f) return;
+    const v = parecido(d.f, e.f); if (v != null) sims.push({pct: v, estrella: ESTRELLAS.has(y.esp + "|" + y.fecha)}); });
+  const refs = HIST.filter(y => y.esp === x.esp && !y.local && DATOS[kH(y)] && DATOS[kH(y)].f).map(y => ({esp: y.esp, f: DATOS[kH(y)].f}));
+  return apoyoPar(sims, escalaApoyo(refs, x.esp));
+}
 function mejorOtro(x) {
   const d = DATOS[kH(x)]; if (!d || !d.f) return null; let m = null;
   HIST.forEach(y => { if (y.esp !== x.esp || y.fecha === x.fecha || y.local) return; const e = DATOS[kH(y)]; if (!e || !e.f) return;
@@ -864,12 +963,12 @@ function pintarHist(hechos, total, fallos) {
   if (!con.length) { cont.innerHTML = '<p class="nota-m">No se pudo descargar el tiempo de tus días. Vuelve a abrir esta pestaña.</p>'; HIST_CARGANDO = null; return; }
   const nv = p => p >= UMBRAL.alta ? "alta" : (p >= UMBRAL.media ? "media" : "baja");
   const f = (v, u, n) => v == null ? "–" : v.toFixed(n == null ? 1 : n) + u;
-  const filas = con.map(x => { const d = DATOS[kH(x)], n = nv(d.pts), par = mejorOtro(x);
+  const filas = con.map(x => { const d = DATOS[kH(x)], ap = apoyoHist(x), pts = puntosPar(d.pts, ap), n = nv(pts), par = mejorOtro(x);
     return `<tr><td>${fd(x)}<br><span class="sp">${NOMBRE[x.esp]}${x.local ? " (mov. local)" : ""}</span></td>` +
-      `<td class="t">${d.pts}</td><td class="t"><span class="niv ${n}">${n.toUpperCase()}</span></td><td class="t">${par == null ? "–" : Math.round(par) + " %"}</td></tr>` +
+      `<td class="t">${pts}</td><td class="t"><span class="niv ${n}">${n.toUpperCase()}</span></td><td class="t">${par == null ? "–" : Math.round(par) + " %"}</td></tr>` +
       `<tr><td colspan="4" style="text-align:left;font-size:12px;color:var(--muted);white-space:normal;padding-top:0">${d.falla && d.falla.length ? "No cumple: " + esc(d.falla.join("; ")) : "Cumple todo"}</td></tr>`; }).join("");
-  const base = con.filter(x => !x.local), ok = base.filter(x => DATOS[kH(x)].pts >= UMBRAL.media);
-  const porEsp = e => { const b = base.filter(x => x.esp === e); return `${NOMBRE[e]}: ${b.filter(x => DATOS[kH(x)].pts >= UMBRAL.media).length} de ${b.length}`; };
+  const base = con.filter(x => !x.local), ok = base.filter(x => ptsHist(x) >= UMBRAL.media);
+  const porEsp = e => { const b = base.filter(x => x.esp === e); return `${NOMBRE[e]}: ${b.filter(x => ptsHist(x) >= UMBRAL.media).length} de ${b.length}`; };
   const conL = con.filter(x => (DATOS[kH(x)].llL || 0) > 0.5 || (DATOS[kH(x)].llA || 0) > 0.5).length;
   const conDato = con.filter(x => DATOS[kH(x)].llL != null && DATOS[kH(x)].llA != null).length;
   const cuerpoLl = con.map(x => { const d = DATOS[kH(x)];
