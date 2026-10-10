@@ -456,7 +456,7 @@ function evalMalviz(P, dia) {
   const enC = enCal(dia,[10,10],[11,25]);
   const ll = sumaLluvia(L, U);
   const HV = horasViento(P, a, b), sD = HV ? HV.sh("dE",150,260) : null, nh = HV ? HV.n : null;
-  const nubOk = nubes >= 75, dirOk = enSector(dE,150,260) && (sD == null || sD >= 0.5), fD = sD == null ? 1 : Math.min(1, sD/0.7);
+  const nubOk = nubes >= 75, dirOk = enSector(dE,150,260) && (sD == null || sD >= 0.4), fD = sD == null ? 1 : Math.min(1, sD/0.7);
   const cFuerza = crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: ≤ 30 km/h y rachas ≤ 75`, fz, 10);
   const cDir = crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°)${sD == null ? "" : ", " + Math.round(sD*nh) + " de " + nh + " horas en el sector"}. Bueno: del SSE al OSO (150°-260°), la mayoría de las horas`, dirOk, 20, dirOk ? Math.round(20*fD) : 0);
   const cCal = crit("Dentro del calendario (10 oct - 25 nov)", enC, 15);
@@ -770,7 +770,18 @@ async function cargar() {
       R.forEach((f, k) => ESPECIES.forEach(e => { const x = f[e], dst = RES[k][e];
         if (x && dst) dst.modelos.push({nombre:m.nombre, puntos:x.puntos, nivel:x.nivel}); }));
     });
-    MODELOS_TXT = usados.length ? "Contrastado con: " + usados.join(", ") + (faltan.length ? ". Sin datos de: " + faltan.join(", ") : "")
+    // la nota principal es la del modelo que queda en el medio (mediana) entre los que hay: así un solo modelo discrepante no decide
+    const TODOS = [{nombre:"Open-Meteo (mezcla)", R:RES}];
+    extra.forEach((Pm, i) => { if (Pm) TODOS.push({nombre:MODELOS[i].nombre, R:analizar(Pm, hoy, ahora, 7, REFS_F)}); });
+    if (TODOS.length >= 3) {
+      RES = RES.map((f0_, k) => { const fila = {...f0_}; ESPECIES.forEach(e => {
+        const c = TODOS.map(t => ({nombre:t.nombre, r:t.R[k] && t.R[k][e]})).filter(x => x.r);
+        if (c.length < 3) return;
+        const ord = c.slice().sort((x, y) => x.r.puntos - y.r.puntos), med = ord[Math.floor((ord.length - 1)/2)];
+        const sel = med.r; sel.modelos = c.map(x => ({nombre: x.nombre + (x === med ? " · principal (mediana)" : ""), puntos:x.r.puntos, nivel:x.r.nivel}));
+        fila[e] = sel; }); return fila; });
+    }
+    MODELOS_TXT = usados.length ? "La nota principal es la mediana de los modelos. Contrastado con: " + usados.join(", ") + (faltan.length ? ". Sin datos de: " + faltan.join(", ") : "")
                                 : "No se pudo contrastar con otros modelos";
     ULTIMA = n;
     $("estado").textContent = "Actualizado " + n.toLocaleString("es-ES", {weekday:"short", hour:"2-digit", minute:"2-digit"});
@@ -903,7 +914,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v9"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v10"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
