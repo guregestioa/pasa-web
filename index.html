@@ -146,9 +146,11 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <div class="tabs" role="tablist">
   <button class="tab" role="tab" id="t1" aria-selected="true" data-v="prev">Previsión</button>
   <button class="tab" role="tab" id="t2" aria-selected="false" data-v="ref">Tus días</button>
+  <button class="tab" role="tab" id="t3" aria-selected="false" data-v="bec">Becada</button>
 </div>
 <main id="prev"></main>
 <main id="ref" hidden></main>
+<main id="bec" hidden></main>
 <div id="abajo">
 <section class="sec" id="concl"><h2>Conclusiones por especie</h2>
 <p class="nota-m">Salen de tus 38 días de pase (2019-2025). Para cada uno bajé el tiempo real de Landas, Burdeos, Poitiers, Urrugne y Andoain, y lo comparé con todos los días de las temporadas 2019-2025 para ver qué distingue a tus días buenos de los demás. Medias de la ventana: de 7 a 13 h para paloma y malviz, y la noche de 21 a 6 h para la becada. Lo de la red solo lo uso para contrastar.</p>
@@ -168,17 +170,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 </ul>
 <h4>Qué hace la página con esto</h4>
 <p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50; hasta 10° fuera de esos límites puntúa la mitad y no pasa de 85, para no perder los días al borde) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div></details>
-<details class="acc"><summary>Becada <span class="chip">9 noches · confianza media-baja</span></summary><div class="accb">
-<h4>Dos tipos de noche</h4>
-<ul>
-<li><b>Fría y tranquila (6 noches):</b> 20/11/19, 23/11/20, 24/11/20, 22/11/21, 2/12/22 y 26/12/23. De 2,7 a 6,4 °C de media en Francia, viento flojo (de 4 a 10 km/h) del NO al E en Landas. El 20/11/19, el 24/11/20 y el 22/11/21 la presión bajó de 5 a 8 hPa con cielo cubierto; el 23/11/20 fue anticiclón con 1029 hPa.</li>
-<li><b>Templada con lluvia (2 noches):</b> 1/11/22 y 22/11/22. De 8 a 15 °C en Francia, viento del SO de 14 a 19 km/h y de 16 mm de lluvia. Es lo contrario de lo anterior. Solo son 2 noches.</li>
-<li><b>Sin patrón (1 noche):</b> 12/12/23, con 12 °C, cielo cubierto y viento del S, sin lluvia. No encaja con ninguno de los dos tipos.</li>
-</ul>
-<h4>Qué hace la página con esto</h4>
-<p>Calcula los dos patrones y se queda con el que más puntos da. Da más peso a tus 3 noches estrella (<span style="color:var(--media)">★</span> 20/11/19, 24/11/20 y 22/11/21), las de más becadas: frío en Francia, viento flojo del E, cielo cubierto y presión bajando 5 hPa o más. Una noche así llega a ALTA. Una noche fría y tranquila que no tiene la presión bajando ni el cielo cubierto se queda en MEDIA. El calendario llega hasta el 31 de diciembre.</p>
-<p class="nota-m">2020 fue tu mejor año de becada, de noviembre a enero. Sus dos noches (23 y 24/11/20) ya están. Si me das más fechas de ese año (diciembre y enero), puedo ver qué tuvo el tiempo de esa temporada. Todavía no he medido con qué frecuencia se da el patrón estrella en toda la temporada, para saber cuántos falsos avisos da.</p>
-<p class="nota-m">El 26/12/23 lo marcaste como posible movimiento local. En la tabla de «Tus días» sale aparte y no cuenta para el parecido.</p></div></details>
+
 <details class="acc"><summary>Malviz y zorzal <span class="chip">17 días · confianza media-baja</span></summary><div class="accb">
 <p class="nota-m">Tus 12 días de la lista más 5 días de la semana del 23 al 28/10/22 (23, 24, 26, 27 y 28) que me dijiste que fue de pase masivo cada día (el 25 y el 29 ya están en tu lista).</p>
 <h4>Dos tipos de día</h4>
@@ -218,7 +210,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li>Son datos de reanálisis. La previsión es de otro modelo y puede dar valores algo distintos, sobre todo a 3 días vista o más.</li>
 </ul></div></details>
 </section>
-<section class="sec" id="mig"><h2>Migración de la becada: cómo va</h2><div id="migc"><p class="sub">Cargando…</p></div></section>
+
 <section class="sec" id="base"><h2>En qué me baso</h2>
 <p class="nota-m">Resumen de las fuentes que he usado para las reglas y para este panel. Lo que está marcado como «sin contrastar» no está comprobado con tus fechas.</p>
 <details class="acc"><summary>Palomas torcaces</summary><div class="accb">
@@ -232,13 +224,6 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li><b>Tus 17 días de pase de malviz</b> (2022-2025): cielo cubierto y templado con viento del S al SO, calor y viento del sur la semana del 23 al 29/10/22, días de lluvia fina continua, y un día claro con viento flojo del ESE (1/11/24).</li>
 <li><b>Bibliografía y prensa de caza</b>: viento N-NE y frío. No sale en ninguno de tus días, así que ya no se usa.</li>
 <li>No he encontrado conteos abiertos de zorzales con tiempo asociado que permitan afinar más.</li>
-</ul>
-</div></details><details class="acc"><summary>Becadas</summary><div class="accb">
-<ul>
-<li><b>Tus 9 noches de entrada de becada</b> (2019-2023) y el tiempo en Francia esas noches. De ahí salen los dos patrones: noche fría y tranquila con viento del E, y noche templada con lluvia y viento del SO.</li>
-<li><b>CCBP y Scolopax Sin Fronteras</b> (<a href="https://www.ccbp.org/es" target="_blank" rel="noopener">ccbp.org</a>, <a href="https://rtvs1.ccbp.org" target="_blank" rel="noopener">rtvs1.ccbp.org</a>) y la <b>Casa de la Becada</b> (Garralda): llegan con frío en el origen, viento N-NE, noches tranquilas y secas, y suelo húmedo sin helar. El pico en Euskadi está entre la última semana de noviembre y principios de diciembre, y el paso termina hacia el 15 de diciembre.</li>
-<li><b>Seguimiento por satélite</b> (<a href="https://gwct.org.uk/research/scientific-publications/2020/hoodless2020/" target="_blank" rel="noopener">Hoodless y otros, 2020</a>): las becadas que invernan en Gran Bretaña e Irlanda salen sobre todo del noroeste de Rusia, de Escandinavia y de Finlandia. La salida media es el 10 de octubre y la llegada máxima es en noviembre.</li>
-<li><b>Federaciones de caza y Réseau Bécasse de Francia</b> (<a href="https://www.chasse-nature-occitanie.fr/aveyron/ma-fede/documents/Info-Mig-8-Janv-2026-trA-s-com.pdf" target="_blank" rel="noopener">Info Mig, Aveyron</a>, <a href="https://ofb.gouv.fr/doc/becasse-flash-info-n-1-saison-20232024" target="_blank" rel="noopener">Bécasse Flash Info, OFB</a>): primeras llegadas a mediados de octubre y pico en la primera quincena de noviembre en Francia. Las becadas aguantan entre 3 y 5 días sin comer, y hasta un 25 % más de 9 días. Con una ola de frío fuerte pueden volar hasta 700 km hacia zonas más cálidas.</li>
 </ul>
 </div></details><details class="acc"><summary>Luna</summary><div class="accb">
 <ul>
@@ -255,6 +240,33 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li>Sin días de control en los que no pasó nada no puedo calcular los falsos avisos reales, solo compararlos con todos los días de la temporada.</li>
 </ul>
 </div></details></section>
+</div>
+<div id="abajoB" hidden>
+<section class="sec" id="noches"><h2>Tus noches de becada</h2><div id="refb"></div></section>
+<section class="sec" id="mig"><h2>Migración de la becada: cómo va</h2><div id="migc"><p class="sub">Cargando…</p></div></section>
+<section class="sec" id="conclb"><h2>Conclusiones de la becada</h2>
+<details class="acc"><summary>Becada <span class="chip">9 noches · confianza media-baja</span></summary><div class="accb">
+<h4>Dos tipos de noche</h4>
+<ul>
+<li><b>Fría y tranquila (6 noches):</b> 20/11/19, 23/11/20, 24/11/20, 22/11/21, 2/12/22 y 26/12/23. De 2,7 a 6,4 °C de media en Francia, viento flojo (de 4 a 10 km/h) del NO al E en Landas. El 20/11/19, el 24/11/20 y el 22/11/21 la presión bajó de 5 a 8 hPa con cielo cubierto; el 23/11/20 fue anticiclón con 1029 hPa.</li>
+<li><b>Templada con lluvia (2 noches):</b> 1/11/22 y 22/11/22. De 8 a 15 °C en Francia, viento del SO de 14 a 19 km/h y de 16 mm de lluvia. Es lo contrario de lo anterior. Solo son 2 noches.</li>
+<li><b>Sin patrón (1 noche):</b> 12/12/23, con 12 °C, cielo cubierto y viento del S, sin lluvia. No encaja con ninguno de los dos tipos.</li>
+</ul>
+<h4>Qué hace la página con esto</h4>
+<p>Calcula los dos patrones y se queda con el que más puntos da. Da más peso a tus 3 noches estrella (<span style="color:var(--media)">★</span> 20/11/19, 24/11/20 y 22/11/21), las de más becadas: frío en Francia, viento flojo del E, cielo cubierto y presión bajando 5 hPa o más. Una noche así llega a ALTA. Una noche fría y tranquila que no tiene la presión bajando ni el cielo cubierto se queda en MEDIA. El calendario llega hasta el 31 de diciembre.</p>
+<p class="nota-m">2020 fue tu mejor año de becada, de noviembre a enero. Sus dos noches (23 y 24/11/20) ya están. Si me das más fechas de ese año (diciembre y enero), puedo ver qué tuvo el tiempo de esa temporada. Todavía no he medido con qué frecuencia se da el patrón estrella en toda la temporada, para saber cuántos falsos avisos da.</p>
+<p class="nota-m">El 26/12/23 lo marcaste como posible movimiento local. En la tabla de «Tus días» sale aparte y no cuenta para el parecido.</p></div></details>
+</section>
+<section class="sec" id="baseb"><h2>En qué me baso (becada)</h2>
+<details class="acc"><summary>Becadas</summary><div class="accb">
+<ul>
+<li><b>Tus 9 noches de entrada de becada</b> (2019-2023) y el tiempo en Francia esas noches. De ahí salen los dos patrones: noche fría y tranquila con viento del E, y noche templada con lluvia y viento del SO.</li>
+<li><b>CCBP y Scolopax Sin Fronteras</b> (<a href="https://www.ccbp.org/es" target="_blank" rel="noopener">ccbp.org</a>, <a href="https://rtvs1.ccbp.org" target="_blank" rel="noopener">rtvs1.ccbp.org</a>) y la <b>Casa de la Becada</b> (Garralda): llegan con frío en el origen, viento N-NE, noches tranquilas y secas, y suelo húmedo sin helar. El pico en Euskadi está entre la última semana de noviembre y principios de diciembre, y el paso termina hacia el 15 de diciembre.</li>
+<li><b>Seguimiento por satélite</b> (<a href="https://gwct.org.uk/research/scientific-publications/2020/hoodless2020/" target="_blank" rel="noopener">Hoodless y otros, 2020</a>): las becadas que invernan en Gran Bretaña e Irlanda salen sobre todo del noroeste de Rusia, de Escandinavia y de Finlandia. La salida media es el 10 de octubre y la llegada máxima es en noviembre.</li>
+<li><b>Federaciones de caza y Réseau Bécasse de Francia</b> (<a href="https://www.chasse-nature-occitanie.fr/aveyron/ma-fede/documents/Info-Mig-8-Janv-2026-trA-s-com.pdf" target="_blank" rel="noopener">Info Mig, Aveyron</a>, <a href="https://ofb.gouv.fr/doc/becasse-flash-info-n-1-saison-20232024" target="_blank" rel="noopener">Bécasse Flash Info, OFB</a>): primeras llegadas a mediados de octubre y pico en la primera quincena de noviembre en Francia. Las becadas aguantan entre 3 y 5 días sin comer, y hasta un 25 % más de 9 días. Con una ola de frío fuerte pueden volar hasta 700 km hacia zonas más cálidas.</li>
+</ul>
+</div></details>
+</section>
 </div>
 <p class="pie">Datos de Open-Meteo (Landas, Burdeos, Poitiers, Urrugne, Andoain). Las reglas salen de tus días de pase; son orientativas. Las previsiones a 3 días o más fallan más.</p>
 
@@ -669,7 +681,9 @@ function lunaEn(ms) {
 // día de pase: 10:00 hora local; becada: noche del día (00:00 local ≈ 22:00 UTC del día anterior de pase)
 const lunaDe = (dia, esp) => lunaEn(esp === "becada" ? dia + 22*HORA : dia + 8*HORA);
 const lunaTxt = l => `${Math.round(l.k*100)} % iluminada, ${l.fase}`;
-let PBASE = null, RES = [], SEL = null, ULTIMA = null, MODELOS_TXT = "", AVISOS = [];
+const ESP_P = ["paloma","malviz"], ESP_B = ["becada"];
+const COL = {paloma:'<th>Paloma<small>día 7-13 h</small></th>', malviz:'<th>Malviz<small>día 7-13 h</small></th>', becada:'<th>Becada<small>noche 21-6 h</small></th>'};
+let PBASE = null, RES = [], SEL = null, SELB = null, ULTIMA = null, MODELOS_TXT = "", AVISOS = [];
 const RANGO = {baja:0, media:1, alta:2};
 function guardado(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
 function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -697,18 +711,18 @@ function notificar(nuevos) {
     new Notification("Pasa Andoain: " + nuevos.length + (nuevos.length === 1 ? " aviso nuevo" : " avisos nuevos"),
       {body: nuevos.map(a => `${NOMBRE[a.e]} ${a.nivel.toUpperCase()} ${etiq(RES[a.k] ? RES[a.k].dia : 0)}`).join("\n")}); } } catch (e) {}
 }
-function avisosHtml() {
-  let h = "";
-  if (AVISOS.length) {
-    const lis = AVISOS.map(a => { const f = RES[a.k];
+function avisosHtml(esps, notif) {
+  let h = ""; const AV = AVISOS.filter(a => esps.includes(a.e));
+  if (AV.length) {
+    const lis = AV.map(a => { const f = RES[a.k];
       const dia = f ? cuando(f, a.e) : a.clave.split("|")[0];
       return `<li><b>${NOMBRE[a.e]} · ${dia} · ${a.nivel.toUpperCase()} (${a.puntos})</b>` +
         `<br><span class="ant">Antes: ${a.antes.toUpperCase()}. ${esc(a.resumen || "")}` +
         (a.cs ? ` · ${a.cs.si}/${a.cs.n} modelos` : "") + (a.k >= 3 ? " · previsión orientativa" : "") + `</span></li>`; }).join("");
     h += `<section class="aviso" role="alert"><h2>Aviso: las condiciones mejoran</h2><ul>${lis}</ul>` +
-      `<button class="btn2" id="visto" type="button">Entendido</button></section>`;
+      `<button class="btn2" type="button" data-visto="1">Entendido</button></section>`;
   }
-  if ("Notification" in window && Notification.permission === "default")
+  if (notif && "Notification" in window && Notification.permission === "default")
     h += `<p class="nt"><button class="btn2" id="notif" type="button">Activar avisos del navegador</button> <span class="sub">Solo con la página abierta.</span></p>`;
   return h;
 }
@@ -785,7 +799,7 @@ async function cargar() {
                                 : "No se pudo contrastar con otros modelos";
     ULTIMA = n;
     $("estado").textContent = "Actualizado " + n.toLocaleString("es-ES", {weekday:"short", hour:"2-digit", minute:"2-digit"});
-    SEL = mejorCelda() || SEL;
+    SEL = mejorCelda(ESP_P) || SEL; SELB = mejorCelda(ESP_B) || SELB;
     actualizarAvisos();
     pintar();
   } catch (e) {
@@ -794,9 +808,9 @@ async function cargar() {
   }
   $("act").disabled = false;
 }
-function mejorCelda() {
+function mejorCelda(esps) {
   let m = null;
-  RES.forEach(f => ESPECIES.forEach(e => { const r = f[e];
+  RES.forEach(f => esps.forEach(e => { const r = f[e];
     if (r && (!m || r.puntos > m.p)) m = {p:r.puntos, k:f.k, e}; }));
   return m && {k:m.k, e:m.e};
 }
@@ -822,38 +836,39 @@ function consenso(r) {
   return {si, n:m.length, min:Math.min(...ps), max:Math.max(...ps)};
 }
 function cuando(f, e) { return e === "becada" ? "noche del " + etiq(f.dia) : etiq(f.dia); }
-function pintar() {
+function pintar() { pintarTab("prev", ESP_P, SEL, "det"); pintarTab("bec", ESP_B, SELB, "detb"); }
+function pintarTab(dest, esps, sel, detId) {
   if (!RES.length) return;
-  const m = mejorCelda(); let top = "";
+  const m = mejorCelda(esps); let top = "";
   if (m) { const f = RES[m.k], r = f[m.e];
     top = `<div class="mejor">Mejor opción de la semana<br><b>${NOMBRE[m.e]} · ${cuando(f, m.e)} · ${r.puntos}/100 ${r.nivel.toUpperCase()}</b>` +
       (m.k >= 3 ? `<br><small>Previsión a ${m.k} días, orientativa.</small>` : "") + `</div>`; }
   const filas = RES.map(f => `<tr><th class="d">${etiq(f.dia)}<small>${diaClima(f.dia)}${f.k >= 3 ? "<br><i>orientativa</i>" : ""}</small></th>` +
-    ESPECIES.map(e => { const r = f[e];
+    esps.map(e => { const r = f[e];
       if (!r) return `<td class="na">–</td>`;
-      const on = SEL && SEL.k === f.k && SEL.e === e;
+      const on = sel && sel.k === f.k && sel.e === e;
       const cs = consenso(r);
       return `<td><button type="button" class="c ${r.nivel}" data-k="${f.k}" data-e="${e}" aria-pressed="${on}">` +
         `<span class="n">${r.puntos}</span><span class="l">${r.nivel.toUpperCase()}</span>` +
         (cs ? `<span class="p">${cs.si}/${cs.n} modelos</span>` : "") +
         `</button></td>`; }).join("") + `</tr>`).join("");
-  $("prev").innerHTML = avisosHtml() + top +
-    `<div class="wrap"><table><tr><th></th><th>Paloma<small>día 7-13 h</small></th><th>Becada<small>noche 21-6 h</small></th><th>Malviz<small>día 7-13 h</small></th></tr>${filas}</table></div>` +
+  $(dest).innerHTML = avisosHtml(esps, dest === "prev") + top +
+    `<div class="wrap"><table><tr><th></th>${esps.map(e => COL[e]).join("")}</tr>${filas}</table></div>` +
     `<div class="leg"><span><i style="background:var(--alta)"></i>Alta ≥ ${UMBRAL.alta}</span><span><i style="background:var(--media)"></i>Media ≥ ${UMBRAL.media}</span><span><i style="background:var(--line)"></i>Baja</span><span>«3/5 modelos»: cuántos dan media o alta</span></div>` +
     (MODELOS_TXT ? `<p class="sub" style="margin-top:8px">${esc(MODELOS_TXT)}</p>` : "") +
-    `<div id="det"></div>` +
+    `<div id="${detId}"></div>` +
     `<div class="links"><a href="https://www.windguru.cz/" target="_blank" rel="noopener">Windguru</a><a href="https://www.euskalmet.euskadi.eus/" target="_blank" rel="noopener">Euskalmet</a><a href="https://www.aemet.es/" target="_blank" rel="noopener">AEMET</a><a href="https://meteofrance.com/" target="_blank" rel="noopener">Météo-France</a><a href="https://meteoconsult.fr/" target="_blank" rel="noopener">Meteoconsult</a><a href="https://www.meteoblue.com/es/" target="_blank" rel="noopener">Meteoblue</a></div><p class="sub">Enlaces para mirar a mano. Estas webs no dejan que la página lea sus datos.</p>`;
-  detalle();
-  const v = $("visto"); if (v) v.addEventListener("click", () => { AVISOS = []; guardar("pasa_avisos", []);
-    document.title = "Pasa Andoain"; pintar(); });
+  detalle(sel, detId);
+  $(dest).querySelectorAll("[data-visto]").forEach(v => v.addEventListener("click", () => { AVISOS = []; guardar("pasa_avisos", []);
+    document.title = "Pasa Andoain"; pintar(); }));
   const nb = $("notif"); if (nb) nb.addEventListener("click", () => { try { Notification.requestPermission().then(pintar); } catch (e) {} });
-  document.querySelectorAll(".c").forEach(b => b.addEventListener("click", () => {
-    SEL = {k:+b.dataset.k, e:b.dataset.e}; pintar(); $("det").scrollIntoView({behavior:"smooth", block:"nearest"}); }));
+  $(dest).querySelectorAll(".c").forEach(b => b.addEventListener("click", () => {
+    const s = {k:+b.dataset.k, e:b.dataset.e}; if (s.e === "becada") SELB = s; else SEL = s; pintar(); $(detId).scrollIntoView({behavior:"smooth", block:"nearest"}); }));
 }
-function detalle() {
-  if (!SEL || !RES[SEL.k] || !RES[SEL.k][SEL.e]) { $("det").innerHTML = ""; return; }
+function detalle(SEL, detId) {
+  if (!SEL || !RES[SEL.k] || !RES[SEL.k][SEL.e]) { $(detId).innerHTML = ""; return; }
   const f = RES[SEL.k], r = f[SEL.e];
-  $("det").innerHTML = `<section class="det"><h2>${NOMBRE[SEL.e]} · ${cuando(f, SEL.e)}</h2>` +
+  $(detId).innerHTML = `<section class="det"><h2>${NOMBRE[SEL.e]} · ${cuando(f, SEL.e)}</h2>` +
     `<div><b>${r.puntos}/100 ${r.nivel.toUpperCase()}</b> · ${esc(r.resumen)}</div>` +
     (r.parecido ? parecidoHtml(r.parecido, SEL.e) : "") +
     (r.nota ? `<p class="nota">${esc(r.nota)}</p>` : `<p class="nota"></p>`) +
@@ -989,11 +1004,13 @@ function mejorOtro(x) {
   return m;
 }
 function pintarHist(hechos, total, fallos) {
-  const cont = $("hist"); if (!cont) return;
+  [["hist", HIST.filter(x => x.esp !== "becada")], ["histb", HIST.filter(x => x.esp === "becada")]].forEach(([id, lista]) => { const cont = $(id); if (cont) cont.innerHTML = histHtml(lista, hechos, total, fallos); });
+}
+function histHtml(lista, hechos, total, fallos) {
   const H3 = t => `<h3 style="font:600 18px var(--f-num);letter-spacing:.03em;text-transform:uppercase;margin:18px 0 4px;color:var(--acc)">${t}</h3>`;
-  if (total) { cont.innerHTML = `<p class="sub">Descargando el tiempo de tus ${HIST.length} días de Open-Meteo… ${hechos} de ${total}</p>`; return; }
-  const con = HIST.filter(x => DATOS[kH(x)] && DATOS[kH(x)].pts != null);
-  if (!con.length) { cont.innerHTML = '<p class="nota-m">No se pudo descargar el tiempo de tus días. Vuelve a abrir esta pestaña.</p>'; HIST_CARGANDO = null; return; }
+  if (total) return `<p class="sub">Descargando el tiempo de tus ${HIST.length} días de Open-Meteo… ${hechos} de ${total}</p>`;
+  const con = lista.filter(x => DATOS[kH(x)] && DATOS[kH(x)].pts != null);
+  if (!con.length) { HIST_CARGANDO = null; return '<p class="nota-m">No se pudo descargar el tiempo de tus días. Vuelve a abrir esta pestaña.</p>'; }
   const nv = p => p >= UMBRAL.alta ? "alta" : (p >= UMBRAL.media ? "media" : "baja");
   const f = (v, u, n) => v == null ? "–" : v.toFixed(n == null ? 1 : n) + u;
   const filas = con.map(x => { const d = DATOS[kH(x)], ap = apoyoHist(x), pts = puntosPar(d.pts, ap), n = nv(pts), par = mejorOtro(x);
@@ -1006,41 +1023,46 @@ function pintarHist(hechos, total, fallos) {
   const conDato = con.filter(x => DATOS[kH(x)].llL != null && DATOS[kH(x)].llA != null).length;
   const cuerpoLl = con.map(x => { const d = DATOS[kH(x)];
     return `<tr><td>${fd(x)}<br><span class="sp">${NOMBRE[x.esp]}</span></td><td class="t">${f(d.llL," mm")}</td><td class="t">${f(d.llA," mm")}</td><td class="t">${x.esp === "becada" ? "–" : f(d.sol," h")}</td><td class="t">${f(d.nub," %",0)}</td></tr>`; }).join("");
-  cont.innerHTML = H3("Autocomprobación: qué dan las reglas en tus días") +
+  return H3("Autocomprobación: qué dan las reglas en tus días") +
     `<p class="sub" style="font-size:14px">Cada fila es un día tuyo de pase. Se le aplican las mismas reglas que a la previsión (con datos reales de ese día) para ver si las reglas lo habrían marcado. «Parecido» es el parecido con el día más parecido de la misma especie. Debajo de cada día están los criterios que no cumple.</p>` +
     `<div class="ref wrap"><table style="min-width:0"><tr><th>Día</th><th>Puntos</th><th>Nivel</th><th>Parecido</th></tr>${filas}</table></div>` +
-    `<div class="res"><b>Las reglas dan MEDIA o ALTA en ${ok.length} de tus ${base.length} días</b> (${porEsp("paloma")}; ${porEsp("becada")}; ${porEsp("malviz")}).<br><span class="sub">Las reglas se ajustaron a estos mismos días, así que acertar aquí no prueba nada. Lo que importa es cuántos otros días de la temporada también las cumplen (ver «Límites» en Conclusiones). ${fallos ? "No se pudieron descargar " + fallos + " días." : ""}</span></div>` +
+    `<div class="res"><b>Las reglas dan MEDIA o ALTA en ${ok.length} de tus ${base.length} días</b> (${[...new Set(base.map(x => x.esp))].map(porEsp).join("; ")}).<br><span class="sub">Las reglas se ajustaron a estos mismos días, así que acertar aquí no prueba nada. Lo que importa es cuántos otros días de la temporada también las cumplen (ver «Límites» en Conclusiones). ${fallos ? "No se pudieron descargar " + fallos + " días." : ""}</span></div>` +
     H3("Lluvia y sol en tus días") +
     `<p class="sub" style="font-size:14px">En la misma ventana de cada especie (7-13 h, o la noche de 21 a 6 h para la becada). El sol son las horas de sol de esas 6 h.</p>` +
     `<div class="ref wrap"><table style="min-width:0"><tr><th>Día</th><th>Lluvia Landas</th><th>Lluvia Andoain</th><th>Sol Andoain</th><th>Nubes Andoain</th></tr>${cuerpoLl}</table></div>` +
     `<div class="res"><b>Lluvia de más de 0,5 mm en ${conL} de tus ${conDato} días.</b><br><span class="sub">Datos de reanálisis. Con lluvia es poco probable que pase la paloma, y por eso la página limita la puntuación a 50 si se prevén más de 1 mm en Euskadi, y a 30 si son más de 3 mm.</span></div>`;
 }
-function lunaRef() {
-  const rows = HIST.map(x => { const l = lunaDe(diaPase(x), x.esp);
+function lunaRef(lista) {
+  const rows = lista.map(x => { const l = lunaDe(diaPase(x), x.esp);
     return `<tr><td>${fd(x)}<br><span class="sp">${NOMBRE[x.esp]}</span></td><td class="t">${Math.round(l.k*100)} %</td><td style="text-align:left">${l.fase}</td></tr>`; }).join("");
   return `<h3 style="font:600 18px var(--f-num);letter-spacing:.03em;text-transform:uppercase;margin:18px 0 4px;color:var(--acc)">Luna en tus días</h3>` +
     `<p class="sub" style="font-size:14px">Iluminación de la luna ese día a las 10 h (paloma y malviz) o esa noche a las 0 h (becada).</p>` +
     `<div class="ref wrap"><table style="min-width:0"><tr><th>Día</th><th>Iluminada</th><th style="text-align:left">Fase</th></tr>${rows}</table></div>` +
     `<div class="res"><b>Sin relación clara con la luna.</b><br><span class="sub">Los días buenos de las tres especies caen en todas las fases, de luna nueva a llena. Con tan pocos días, cualquier coincidencia puede ser casualidad.</span></div>`;
 }
-function pintarRef() {
+function refHtml(lista, idHist) {
   const f1 = x => x.toFixed(1), sg = x => (x > 0 ? "+" : "") + x.toFixed(1);
-  const filas = HIST.map(x => { const d = DATOS[kH(x)] && DATOS[kH(x)].l0 != null ? DATOS[kH(x)] : TABLA.find(t => t.esp === x.esp && t.fecha === x.fecha);
+  const filas = lista.map(x => { const d = DATOS[kH(x)] && DATOS[kH(x)].l0 != null ? DATOS[kH(x)] : TABLA.find(t => t.esp === x.esp && t.fecha === x.fecha);
     const nom = `<td>${fd(x)}<br><span class="sp">${NOMBRE[x.esp]}</span></td>`;
     if (!d) return nom + '<td class="t" colspan="6">–</td></tr>';
     const d1 = d.l1 - d.l0, d2 = d.a1 - d.a0;
     return `<tr>${nom}<td class="t">${f1(d.l0)}</td><td class="t">${f1(d.l1)}</td><td class="t ${d1 < 0 ? "dn" : "up"}">${sg(d1)}</td>` +
       `<td class="t">${f1(d.a0)}</td><td class="t">${f1(d.a1)}</td><td class="t ${d2 < 0 ? "dn" : "up"}">${sg(d2)}</td></tr>`; }).join("");
-  const previo = $("hist") ? $("hist").innerHTML : "";
-  $("ref").innerHTML = `<p class="sub" style="font-size:14px"><span style="color:var(--media)">★</span> = días que has marcado (20/11/19, 24/11/20 y 22/11/21).</p><p class="sub" style="font-size:14px">Presión media (hPa) del día previo y del día de pase, en Landas y en Andoain. En la becada, el día de pase es la mañana en que llegaron, tras la noche anterior.</p>` +
+  const previo = $(idHist) ? $(idHist).innerHTML : "";
+  return `<p class="sub" style="font-size:14px"><span style="color:var(--media)">★</span> = días que has marcado como especialmente buenos.</p><p class="sub" style="font-size:14px">Presión media (hPa) del día previo y del día de pase, en Landas y en Andoain.${lista.some(x => x.esp === "becada") ? " En la becada, el día de pase es la mañana en que llegaron, tras la noche anterior." : ""}</p>` +
     `<div class="ref wrap"><table><tr><th rowspan="2">Día</th><th colspan="3">Landas</th><th colspan="3">Andoain</th></tr>` +
     `<tr><th>previo</th><th>pase</th><th>Δ</th><th>previo</th><th>pase</th><th>Δ</th></tr>${filas}</table></div>` +
-    lunaRef() + `<div id="hist">${previo}</div>` +
+    lunaRef(lista) + `<div id="${idHist}">${previo}</div>` +
     `<p class="pie">Datos de reanálisis ERA5 vía Open-Meteo.</p>`;
+}
+function pintarRef() {
+  $("ref").innerHTML = refHtml(HIST.filter(x => x.esp !== "becada"), "hist");
+  if ($("refb")) $("refb").innerHTML = refHtml(HIST.filter(x => x.esp === "becada"), "histb");
 }
 document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
   document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === t));
-  $("prev").hidden = t.dataset.v !== "prev"; $("ref").hidden = t.dataset.v !== "ref"; $("abajo").hidden = t.dataset.v !== "prev"; if (t.dataset.v === "ref") cargarHistoricos(); }));
+  $("prev").hidden = t.dataset.v !== "prev"; $("ref").hidden = t.dataset.v !== "ref"; $("bec").hidden = t.dataset.v !== "bec";
+  $("abajo").hidden = t.dataset.v !== "prev"; $("abajoB").hidden = t.dataset.v !== "bec"; if (t.dataset.v === "ref" || t.dataset.v === "bec") cargarHistoricos(); }));
 $("act").addEventListener("click", () => { cargar(); cargarMigracion(); });
 // con la página abierta, vuelve a comprobar cada 30 minutos
 setInterval(() => { if (!document.hidden) cargar(); }, 30*60*1000);
