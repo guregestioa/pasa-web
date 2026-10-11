@@ -211,7 +211,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 </ul>
 <h4>Límites</h4>
 <ul>
-<li><b>La dirección del viento se mira hora a hora:</b> en paloma (Andoain/Urrugne y Landas) y en los patrones de malviz que usan la dirección, cuenta cuántas de las 7 horas de la ventana (7 a 13 h) caen dentro del sector bueno, y no solo la media. Con 10° de margen cuenta la mitad. Comprobado con tus días: casi todos tienen la mayoría de las horas en el sector del sur. Para dejar la paloma en 50 como máximo, menos del 70 % de las horas de Andoain/Urrugne deben quedar dentro del sector con margen.</li>
+<li><b>La dirección del viento se mira hora a hora:</b> en paloma (Andoain/Urrugne y Landas) y en los patrones de malviz que usan la dirección, cuenta cuántas de las 7 horas de la ventana (7 a 13 h) caen dentro del sector bueno, y no solo la media. Con 10° de margen cuenta la mitad. Comprobado con tus días: casi todos tienen la mayoría de las horas en el sector del sur. La paloma se queda en 50 como máximo si menos de la mitad de las horas de Andoain/Urrugne caen dentro del sector con margen, o si la media queda fuera.</li>
 <li><b>Cómo entra el parecido:</b> primero mandan las reglas del tiempo. Si se cumplen, miro con qué días de pase se parece. Con un 70 % o más a un día, la nota sube y queda como mínimo en 85. A varios días, como mínimo 92. A un día ★, como mínimo 95 (97 si además se parece a otros). Si no llega al 70 % con ninguno, la nota tiene un tope que baja cuanto menos se parece: con un 40 % de parecido como mucho 73, con un 50 % 77, con un 60 % 82 y con un 69 % 86. Tus días buenos se parecen entre sí entre un 38 y un 76 %, así que muchos días buenos no llegarán al 70 % y se quedarán en MEDIA.</li>
 <li>Las reglas se ajustaron a tus propios días, así que acertar en ellos no prueba nada. Lo que sí indica algo es cuántos otros días las cumplen (21 % en paloma, 17 % en becada y 33 % en malviz para el nivel Alta, medido con las reglas actuales en las temporadas 2019-2025).</li>
 <li>No tengo días sin pase. Esos «otros días» pueden incluir días en que pasó y no lo anotaste, así que el porcentaje real de falsos avisos puede ser menor.</li>
@@ -358,7 +358,7 @@ function horasViento(P, a, b) {
     h.push({dE: (sx === 0 && sy === 0) ? aa : (Math.atan2(sx, sy)*180/Math.PI + 360) % 360, dL: (k != null && L.wind_direction_10m[k] != null) ? L.wind_direction_10m[k] : null}); });
   if (h.length < 5) return null;
   const sh = (key, lo, hi) => { const v = h.filter(x => x[key] != null); return v.length ? v.filter(x => enSector(x[key], lo, hi)).length/v.length : null; };
-  return {n: h.length, sh};
+  return {n: h.length, sh, dE: h.map(x => Math.round(x.dE))};
 }
 function evalPaloma(P, dia) {
   const a = hh(dia,7), b = hh(dia,13);
@@ -372,12 +372,12 @@ function evalPaloma(P, dia) {
   const HV = horasViento(P, a, b);
   const sE = HV ? HV.sh("dE",135,205) : (enSector(dE,135,205) ? 1 : 0), sEm = HV ? HV.sh("dE",125,215) : (enSector(dE,125,215) ? 1 : 0);
   const sLh = HV && HV.sh("dL",90,225) != null ? HV.sh("dL",90,225) : (enSector(L.dir,90,225) ? 1 : 0), sLm = HV && HV.sh("dL",80,235) != null ? HV.sh("dL",80,235) : (enSector(L.dir,80,235) ? 1 : 0);
-  const dEok = sE >= 0.7, dEcerca = sEm >= 0.7, dLok = sLh >= 0.7, dLcerca = sLm >= 0.5;
+  const dEok = sE >= 0.7, dEcerca = sEm >= 0.5 && enSector(dE,125,215), dLok = sLh >= 0.7, dLcerca = sLm >= 0.5;
   const ptE = Math.round(25*(sE + 0.5*(sEm - sE))), ptL = Math.round(15*(sLh + 0.5*(sLm - sLh)));
   const nh = HV ? HV.n : null, hE = v => nh ? ` (${Math.round(v*nh)} de ${nh} horas)` : "";
   const dpP = cambio24(P.landas, "pressure_msl", b);
   const c = [
-    crit(`Dirección del viento en Andoain/Urrugne, hora a hora: ${rosa(dE)} de media (${f0(dE)}°), ${nh ? Math.round(sE*nh) + " de " + nh + " horas" : "sin horas"} en el sector. Bueno: del SE al S (135°-205°); hasta 10° fuera cuenta la mitad${nh ? " (con margen: " + Math.round(sEm*nh) + " de " + nh + ")" : ""}`, dEok, 25, ptE),
+    crit(`Dirección del viento en Andoain/Urrugne, hora a hora: ${rosa(dE)} de media (${f0(dE)}°), ${nh ? Math.round(sE*nh) + " de " + nh + " horas" : "sin horas"} en el sector. Bueno: del SE al S (135°-205°); hasta 10° fuera cuenta la mitad${nh ? " (con margen: " + Math.round(sEm*nh) + " de " + nh + ")" : ""}${HV ? ". Hora a hora: " + HV.dE.map(x => x + "°").join(", ") : ""}`, dEok, 25, ptE),
     crit(`Dirección del viento en Landas, hora a hora: ${rosa(L.dir)} de media (${f0(L.dir)}°), ${nh ? Math.round(sLh*nh) + " de " + nh + " horas" : "sin horas"} en el sector. Bueno: del E al SO (90°-225°); hasta 10° fuera cuenta la mitad`, dLok, 15, ptL),
     crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento suave pero con algo de fuerza, 4-26 km/h y rachas ≤ 66 (parcial 2-32 y ≤ 75; casi en calma no hay viento que lleve a las palomas)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
     crit(`FUERZA del viento en Landas ${f0(L.viento)} km/h. Bueno: ≤ 18 km/h (parcial ≤ 25)`, L.viento <= 18, 5, L.viento <= 18 ? 5 : (L.viento <= 25 ? 2 : 0)),
@@ -390,7 +390,7 @@ function evalPaloma(P, dia) {
   const resumen = `viento Andoain ${rosa(dE)} ${f0(vE)} km/h, Landas ${rosa(L.dir)} ${f0(L.viento)} km/h, ${f0(L.presion)} hPa`;
   let nota = enC ? null : "Fuera del calendario habitual (10 oct - 30 nov)";
   const claveOk = (dEok || dEcerca) && (dLok || dLcerca);
-  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (la mayoría de las horas del SE al S en Andoain y del E al SO en Landas, con 10° de margen): no pasa de 50.";
+  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (al menos la mitad de las horas del SE al S en Andoain (y la media dentro del sector con margen) y del E al SO en Landas, con 10° de margen): no pasa de 50.";
   else if (!(dEok && dLok)) nota = (nota ? nota + " " : "") + "La dirección no se mantiene todas las horas dentro del sector (o está al borde): puntúa menos en ese criterio y no llega a ALTA.";
   const r = cerrar(c, resumen, nota, enC ? undefined : false, claveOk);
   if (claveOk && !(dEok && dLok)) r.puntos = Math.min(r.puntos, 85);
@@ -914,7 +914,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v10"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v11"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
