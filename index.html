@@ -469,6 +469,8 @@ function evalMalviz(P, dia) {
   const ll = sumaLluvia(L, U);
   const HV = horasViento(P, a, b), sD = HV ? HV.sh("dE",150,260) : null, nh = HV ? HV.n : null;
   const nubOk = nubes >= 75, dirOk = enSector(dE,150,260) && (sD == null || sD >= 0.4), fD = sD == null ? 1 : Math.min(1, sD/0.7);
+  const vOkA = vE >= 8 && fz;
+  const cFuerzaA = crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: de 8 a 30 km/h y rachas ≤ 75 (sin algo de viento del sur no pasa, salvo con lluvia)`, vOkA, 10, vOkA ? 10 : ((vE >= 4 && fz) ? 4 : 0));
   const cFuerza = crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: ≤ 30 km/h y rachas ≤ 75`, fz, 10);
   const cDir = crit(`Dirección del viento en Andoain/Urrugne: ${rosa(dE)} (${f0(dE)}°)${sD == null ? "" : ", " + Math.round(sD*nh) + " de " + nh + " horas en el sector"}. Bueno: del SSE al OSO (150°-260°), la mayoría de las horas`, dirOk, 20, dirOk ? Math.round(20*fD) : 0);
   const cCal = crit("Dentro del calendario (10 oct - 25 nov)", enC, 15);
@@ -476,7 +478,7 @@ function evalMalviz(P, dia) {
     crit(`Nubes en Landas/Burdeos ${f0(nubes)} %. Bueno: ≥ 75 % (parcial ≥ 60)`, nubOk, 25, nubes >= 75 ? 25 : (nubes >= 60 ? 10 : 0)),
     crit("Sol en Andoain: " + (A.sol == null ? "sin dato" : f1(A.sol) + " h") + " en la ventana. Bueno: ≤ 2 h", A.sol == null ? nubOk : A.sol <= 2, 15),
     crit(`Temperatura en Landas ${f1(L.temp)} °C. Buena: ≥ 11 (aire templado)`, L.temp >= 11, 15),
-    cDir, cFuerza, cCal,
+    cDir, cFuerzaA, cCal,
   ];
   const calor = L.temp >= 16, vOkB = vE >= 8 && fz;
   const cFuerzaB = crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: de 8 a 30 km/h y rachas ≤ 75 (tus días de este patrón tuvieron entre 17 y 30; casi sin viento no pasa de 50)`, vOkB, 10, vOkB ? 10 : ((vE >= 4 && fz) ? 4 : 0));
@@ -521,7 +523,7 @@ function evalMalviz(P, dia) {
     resumen = `sol ${A.sol == null ? "?" : f1(A.sol)} h, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
   else if (sum(cC) > Math.max(sum(cA), sum(cB))) { c = cC; claveOk = claveC; patron = "Patrón día lluvioso (4 de tus días): lluvia fina y continua, cielo cubierto, poco viento en Francia" + (dirN && !dirS ? ". Con viento del N no lo has confirmado con ningún día: no pasa de 75" : "");
     resumen = `lluvia ${lluDia == null ? "?" : f1(lluDia)} mm, nubes ${f0(nFr)} %, viento Euskadi ${rosa(dE)} ${f0(vE)} km/h`; }
-  else if (sum(cA) >= sum(cB)) { c = cA; claveOk = nubOk && dirOk; patron = "Patrón nublado y templado (6 de tus días)";
+  else if (sum(cA) >= sum(cB)) { c = cA; claveOk = nubOk && dirOk && vOkA; patron = "Patrón nublado y templado (6 de tus días)";
     resumen = `nubes ${f0(nubes)} %, ${f1(L.temp)} °C, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
   else { c = cB; claveOk = calor && dirOk && vOkB; patron = "Patrón calor y viento del S (la semana del 23 al 29/10/22)";
     resumen = `${f1(L.temp)} °C en Landas, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
@@ -959,7 +961,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v13"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v14"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
