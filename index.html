@@ -394,7 +394,7 @@ function evalPaloma(P, dia) {
     crit(`FUERZA del viento en Euskadi ${f0(vE)} km/h${txtR}. Bueno: viento suave pero con algo de fuerza, 4-26 km/h y rachas ≤ 66 (parcial 2-32 y ≤ 75; casi en calma no hay viento que lleve a las palomas)`, fOk, 15, fOk ? 15 : (fMed ? 7 : 0)),
     crit(`FUERZA del viento en Landas ${f0(L.viento)} km/h. Bueno: ≤ 18 km/h (parcial ≤ 25)`, L.viento <= 18, 5, L.viento <= 18 ? 5 : (L.viento <= 25 ? 2 : 0)),
     crit(`Temperatura en Landas ${f1(L.temp)} °C. Buena: ≥ 9 (aire templado del sur)`, L.temp >= 9, 5),
-    crit("Presión en Landas " + (dpP == null ? "sin dato" : `${sg1(dpP)} hPa en 24 h`) + ". Buena: estable, entre -5 y +2 (sin frente fuerte ni subida rápida)", dpP == null || (dpP >= -5 && dpP <= 2), 15),
+    crit("Presión en Landas " + (dpP == null ? "sin dato" : `${sg1(dpP)} hPa en 24 h`) + ". Buena: entre -4,5 y +1,5 (así fueron tus 13 días buenos: de -3,9 a +1,1; parcial de -6 a +3)", dpP == null || (dpP >= -4.5 && dpP <= 1.5), 15, dpP == null || (dpP >= -4.5 && dpP <= 1.5) ? 15 : ((dpP >= -6 && dpP <= 3) ? 7 : 0)),
     crit("Lluvia en la ventana: " + (ll == null ? "sin dato" : f1(ll)+" mm") + ". Buena: ≤ 0,5 mm (parcial ≤ 2)", ll == null || ll <= 0.5, 10, (ll == null || ll <= 0.5) ? 10 : (ll <= 2 ? 6 : 0)),
   ];
   const enC = enCal(dia,[10,10],[11,30]);
@@ -539,7 +539,7 @@ function evalMalviz(P, dia) {
 
 /* --- parecido con los 14 dias de pase --- */
 const RASGOS = [
-  ["landas.presion",6,2,0],["andoain.presion",6,1,0],["landas.dp",5,2,0],
+  ["landas.presion",6,1,0],["andoain.presion",6,0.5,0],["landas.dp",5,2,0],
   ["landas.viento",12,1.5,0],["landas.dir",60,2,1],["andoain.viento",12,1.5,0],["andoain.dir",60,2,1],
   ["landas.nubes",40,1,0],["andoain.nubes",40,1,0],["landas.temp",4,1,0],["burdeos.temp",4,1,0],
   ["burdeos.viento",12,1,0],["burdeos.dir",60,1,1],["poitiers.dir",60,1,1],["poitiers.temp",4,1,0],
@@ -548,18 +548,24 @@ function rasgos(P, esp, dia) {
   let a, b, lug;
   if (esp === "becada") { a = hh(dia,21); b = hh(dia+DIA,6); lug = ["landas","burdeos","poitiers","andoain"]; }
   else { a = hh(dia,7); b = hh(dia,13); lug = ["landas","burdeos","andoain"]; }
-  const f = {};
+  const f = {esp};
   for (const k of lug) { if (!P[k]) return null; const s = estadisticas(P[k], a, b); if (!s) return null;
     f[k+".presion"] = s.presion; f[k+".temp"] = s.temp; f[k+".viento"] = s.viento; f[k+".dir"] = s.dir; f[k+".nubes"] = s.nubes; }
   f["landas.dp"] = cambio24(P.landas, "pressure_msl", b);
   return f;
 }
+// cambio de presión en 24 h: en tus 13 días buenos de paloma va de -3,9 a +1,1 hPa (ninguno fuera), así que se compara con ese RANGO y no con un día concreto.
+// En malviz (de -15 a +3,5) y becada (de -8 a +6) varía demasiado entre días buenos: casi no cuenta.
+const DP_PALOMA = [-4.4, 1.6, 3];
+function dpPaloma(x) { const d = Math.max(0, DP_PALOMA[0] - x, x - DP_PALOMA[1]); return d; }
 function parecido(f1_, f2_) {
   let tot = 0, pes = 0;
-  for (const [k, tol, peso, circ] of RASGOS) {
+  const esp = f1_.esp || f2_.esp;
+  for (const [k, tol, peso0, circ] of RASGOS) {
     const x = f1_[k], y = f2_[k]; if (x == null || y == null) continue;
-    let d = Math.abs(x - y); if (circ) d = Math.min(d, 360 - d);
-    tot += peso*Math.max(0, 1 - d/tol); pes += peso;
+    let d = Math.abs(x - y), peso = peso0, t = tol; if (circ) d = Math.min(d, 360 - d);
+    if (k === "landas.dp") { if (esp === "paloma") { d = dpPaloma(x); t = DP_PALOMA[2]; } else peso = 0.5; }
+    tot += peso*Math.max(0, 1 - d/t); pes += peso;
   }
   return pes === 0 ? null : 100*tot/pes;
 }
@@ -594,6 +600,7 @@ function coincidencias(f, g) {
   for (const [k, tol, peso, circ] of RASGOS) {
     const x = f[k], y = g[k]; if (x == null || y == null) continue;
     let d = Math.abs(x - y); if (circ) d = Math.min(d, 360 - d);
+    if (k === "landas.dp" && f.esp === "paloma") { const dd = dpPaloma(x), e0 = {texto: "Landas, cambio de presión en 24 h", hoy: fmtRasgo(k, x), ref: "entre -3,9 y +1,1 en tus días buenos", r: dd/DP_PALOMA[2], peso}; if (dd === 0) si.push(e0); else no.push(e0); continue; }
     const [lug, t] = k.split(".");
     const e = {texto: (t === "dp" ? "Landas, " : (LUG[lug] + ", ")) + VAR[t], hoy: fmtRasgo(k, x), ref: fmtRasgo(k, y), r: d/tol, peso};
     if (d <= tol*0.4) si.push(e); else if (d > tol*0.8) no.push(e);
@@ -735,7 +742,7 @@ function avisosHtml(esps, notif) {
 }
 // días de control en los que NO pasó nada (avisa tú y se añaden aquí)
 const NOPASE = [["paloma","2026-10-10"],["paloma","2026-10-11"],["paloma","2026-10-12"],["malviz","2026-10-10"],["malviz","2026-10-11"],["malviz","2026-10-12"]];
-const CLAVE_NP = "pasa_nopase_v1";
+const CLAVE_NP = "pasa_nopase_v2";
 let NP_F = guardado(CLAVE_NP, []);
 const conNP = a => { a.np = NP_F; return a; };
 async function pedirPasado(lat, lon, ini, fin) {
@@ -757,7 +764,7 @@ async function cargarNoPase() {
       const f = rasgos(P, esp, dia); if (f) { NP_F.push({esp, fecha, f}); nuevo = true; } } catch (e) {} }
   if (nuevo) { guardar(CLAVE_NP, NP_F); if (ULTIMA) cargar(); }
 }
-let REFS_F = conNP(REFS.map(r => ({esp:r.esp, fecha:r.fecha, f:r.f})));
+let REFS_F = conNP(REFS.map(r => ({esp:r.esp, fecha:r.fecha, f:{...r.f, esp:r.esp}})));
 
 const OBLIG = ["pressure_msl","temperature_2m","cloud_cover","wind_speed_10m","wind_direction_10m"];
 const MODELOS = [
@@ -794,21 +801,44 @@ async function bajarModelo(m) {
   await Promise.all(nombres.filter(k => k !== "landas").map(async k => { P[k] = await pedir(...LUGARES[k], ok); }));
   return P;
 }
+let CARGANDO = false, REINTENTOS = 0, TREINT = null;
+const CLAVE_BASE = "pasa_base_v1";
+function ahoraYhoy() { const n = new Date(), ahora = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours(), n.getMinutes()); return {n, ahora, hoy: Math.floor(ahora/DIA)*DIA}; }
+function mostrarBase(P, hoy, ahora) {
+  PBASE = P; RES = analizar(P, hoy, ahora, 7, REFS_F);
+  RES.forEach(f => ESPECIES.forEach(e => { if (f[e]) f[e].modelos = [{nombre:"Open-Meteo (mezcla)", puntos:f[e].puntos, nivel:f[e].nivel}]; }));
+  SEL = mejorCelda(ESP_P) || SEL; SELB = mejorCelda(ESP_B) || SELB;
+  actualizarAvisos(); pintar();
+}
+// al abrir: enseña al instante la última previsión guardada (si tiene menos de 8 h) mientras baja la nueva
+function mostrarGuardada() {
+  const g = guardado(CLAVE_BASE, null); if (!g || !g.P || Date.now() - g.t > 8*3600*1000) return false;
+  try { const {ahora, hoy} = ahoraYhoy(); mostrarBase(g.P, hoy, ahora);
+    $("estado").textContent = "Previsión guardada de las " + new Date(g.t).toLocaleTimeString("es-ES", {hour:"2-digit", minute:"2-digit"}) + " · actualizando…"; return true; } catch (e) { return false; }
+}
 async function cargar() {
-  $("act").disabled = true; $("estado").textContent = "Descargando previsión…";
+  if (CARGANDO) return; CARGANDO = true; clearTimeout(TREINT);
+  $("act").disabled = true; if (!ULTIMA && !PBASE) $("estado").textContent = "Descargando previsión…";
+  let ok = false;
   try {
     const nombres = Object.keys(LUGARES);
-    const [datos, ...extra] = await Promise.all([
-      Promise.all(nombres.map(k => pedir(...LUGARES[k], null))),
-      ...MODELOS.map(m => bajarModelo(m).catch(() => null)),
-    ]);
+    // 1.º la previsión base (rápida): se enseña en cuanto llega
+    const datos = await Promise.all(nombres.map(k => pedir(...LUGARES[k], null)));
     const P = {}; nombres.forEach((k,i) => P[k] = datos[i]);
-    const n = new Date(), ahora = Date.UTC(n.getFullYear(), n.getMonth(), n.getDate(), n.getHours(), n.getMinutes());
-    const hoy = Math.floor(ahora/DIA)*DIA;
-    PBASE = P;
-    RES = analizar(P, hoy, ahora, 7, REFS_F);
+    const {n, ahora, hoy} = ahoraYhoy();
+    guardar(CLAVE_BASE, {t: Date.now(), P});
+    mostrarBase(P, hoy, ahora); ULTIMA = n; ok = true; REINTENTOS = 0;
+    $("estado").textContent = "Actualizado " + n.toLocaleString("es-ES", {weekday:"short", hour:"2-digit", minute:"2-digit"}) + " · contrastando modelos…";
+    // 2.º los otros modelos, de dos en dos para no saturar a Open-Meteo
+    const extra = new Array(MODELOS.length).fill(null);
+    for (let i = 0; i < MODELOS.length; i += 2) {
+      const res = await Promise.all([i, i + 1].filter(j => j < MODELOS.length).map(j => bajarModelo(MODELOS[j]).catch(() => null)));
+      res.forEach((r, k) => { extra[i + k] = r; });
+    }
     const usados = [], faltan = [];
+    RES = analizar(P, hoy, ahora, 7, REFS_F);
     RES.forEach(f => ESPECIES.forEach(e => { if (f[e]) f[e].modelos = [{nombre:"Open-Meteo (mezcla)", puntos:f[e].puntos, nivel:f[e].nivel}]; }));
+    const TODOS = [{nombre:"Open-Meteo (mezcla)", R:RES}];
     extra.forEach((Pm, i) => {
       const m = MODELOS[i];
       if (!Pm) { faltan.push(m.nombre); return; }
@@ -816,10 +846,9 @@ async function cargar() {
       const R = analizar(Pm, hoy, ahora, 7, REFS_F);
       R.forEach((f, k) => ESPECIES.forEach(e => { const x = f[e], dst = RES[k][e];
         if (x && dst) dst.modelos.push({nombre:m.nombre, puntos:x.puntos, nivel:x.nivel}); }));
+      TODOS.push({nombre:m.nombre, R});
     });
     // la nota principal es la del modelo que queda en el medio (mediana) entre los que hay: así un solo modelo discrepante no decide
-    const TODOS = [{nombre:"Open-Meteo (mezcla)", R:RES}];
-    extra.forEach((Pm, i) => { if (Pm) TODOS.push({nombre:MODELOS[i].nombre, R:analizar(Pm, hoy, ahora, 7, REFS_F)}); });
     if (TODOS.length >= 3) {
       RES = RES.map((f0_, k) => { const fila = {...f0_}; ESPECIES.forEach(e => {
         const c = TODOS.map(t => ({nombre:t.nombre, r:t.R[k] && t.R[k][e]})).filter(x => x.r);
@@ -830,17 +859,25 @@ async function cargar() {
     }
     MODELOS_TXT = usados.length ? "La nota principal es la mediana de los modelos. Contrastado con: " + usados.join(", ") + (faltan.length ? ". Sin datos de: " + faltan.join(", ") : "")
                                 : "No se pudo contrastar con otros modelos";
-    ULTIMA = n;
     $("estado").textContent = "Actualizado " + n.toLocaleString("es-ES", {weekday:"short", hour:"2-digit", minute:"2-digit"});
     SEL = mejorCelda(ESP_P) || SEL; SELB = mejorCelda(ESP_B) || SELB;
-    actualizarAvisos();
-    pintar();
+    actualizarAvisos(); pintar();
   } catch (e) {
-    $("estado").textContent = "Sin datos";
-    $("prev").innerHTML = `<div class="msg"><b>No se pudo descargar la previsión.</b><br>${esc(e.message)}.<br>Comprueba la conexión y pulsa Actualizar.</div>`;
+    if (!ok) {
+      if (!PBASE) { $("estado").textContent = "Sin datos · reintentando…";
+        $("prev").innerHTML = `<div class="msg"><b>No se pudo descargar la previsión.</b><br>${esc(e.message)}.<br>Reintento automático en unos segundos; también puedes pulsar Actualizar.</div>`; }
+      else $("estado").textContent = "No se pudo actualizar · reintentando…";
+      // reintenta solo, cada vez más despacio (6, 12, 24, 48 s…) hasta 6 veces
+      if (REINTENTOS < 6) { REINTENTOS++; TREINT = setTimeout(cargar, 6000 * Math.pow(2, REINTENTOS - 1)); }
+    }
   }
-  $("act").disabled = false;
+  CARGANDO = false; $("act").disabled = false;
 }
+// al volver a la app (desde segundo plano, pantalla bloqueada o sin conexión) se refresca solo si hace falta
+function refrescoSiHaceFalta() { if (document.hidden) return; if (!ULTIMA || Date.now() - ULTIMA.getTime() > 20*60*1000) { REINTENTOS = 0; cargar(); } }
+window.addEventListener("online", refrescoSiHaceFalta);
+window.addEventListener("focus", refrescoSiHaceFalta);
+window.addEventListener("pageshow", refrescoSiHaceFalta);
 function mejorCelda(esps) {
   let m = null;
   RES.forEach(f => esps.forEach(e => { const r = f[e];
@@ -963,7 +1000,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
 ];
-const CLAVE_H = "pasa_hist_v14"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v15"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
@@ -1100,7 +1137,7 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
 $("act").addEventListener("click", () => { cargar(); cargarMigracion(); });
 // con la página abierta, vuelve a comprobar cada 30 minutos
 setInterval(() => { if (!document.hidden) cargar(); }, 30*60*1000);
-document.addEventListener("visibilitychange", () => { if (!document.hidden && ULTIMA && Date.now() - ULTIMA.getTime() > 20*60*1000) cargar(); });
+document.addEventListener("visibilitychange", refrescoSiHaceFalta);
 /* ---- Migración de la becada: tiempo a lo largo de la ruta (indicador, no conteos) ---- */
 const RUTA = [
   {n:"Rusia NO (Pskov)", lat:57.8, lon:28.4, origen:true}, {n:"Estonia (Tallin)", lat:59.4, lon:24.7, origen:true},
@@ -1155,7 +1192,7 @@ async function cargarMigracion() {
     cont.innerHTML = `<p class="nota-m">No se pudo cargar el tiempo de la ruta. Pulsa Actualizar.</p>`;
   }
 }
-REFS_F = conNP(armarRefs()); pintarRef(); cargar(); cargarMigracion(); setTimeout(cargarHistoricos, 2500); setTimeout(cargarNoPase, 12000);
+REFS_F = conNP(armarRefs()); pintarRef(); mostrarGuardada(); cargar(); cargarMigracion(); setTimeout(cargarHistoricos, 2500); setTimeout(cargarNoPase, 12000);
 </script>
 </body>
 </html>
