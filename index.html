@@ -52,6 +52,9 @@ td{padding:0}
 .c .p{display:block;font:400 11px var(--f-txt);opacity:.9;margin-top:2px}
 .c.alta{background:var(--alta);color:var(--on)} .c.media{background:var(--media);color:var(--on)}
 .c.baja{border-color:var(--line)}
+.mg{width:46px}.g{width:100%;border:2px solid transparent;border-radius:6px;padding:10px 0;font:700 17px var(--f-num);background:none;color:var(--ink);cursor:pointer}
+.g.alta{background:var(--alta);color:var(--on)}.g.media{background:var(--media);color:var(--on)}.g.baja{border-color:var(--line)}
+th.mgh{font:600 10px var(--f-txt);color:var(--muted);vertical-align:bottom}
 .c[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
 .na{color:var(--baja)}
 .det{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:14px}
@@ -558,16 +561,35 @@ function rasgos(P, esp, dia) {
 // En malviz (de -15 a +3,5) y becada (de -8 a +6) varía demasiado entre días buenos: casi no cuenta.
 const DP_PALOMA = [-4.4, 1.6, 3];
 function dpPaloma(x) { const d = Math.max(0, DP_PALOMA[0] - x, x - DP_PALOMA[1]); return d; }
-function parecido(f1_, f2_) {
+function parecido(f1_, f2_, sinDir) {
   let tot = 0, pes = 0;
   const esp = f1_.esp || f2_.esp;
   for (const [k, tol, peso0, circ] of RASGOS) {
+    if (sinDir && k.endsWith(".dir")) continue;
     const x = f1_[k], y = f2_[k]; if (x == null || y == null) continue;
     let d = Math.abs(x - y), peso = peso0, t = tol; if (circ) d = Math.min(d, 360 - d);
     if (k === "landas.dp") { if (esp === "paloma") { d = dpPaloma(x); t = DP_PALOMA[2]; } else peso = 0.5; }
     tot += peso*Math.max(0, 1 - d/t); pes += peso;
   }
   return pes === 0 ? null : 100*tot/pes;
+}
+// ---- probabilidad de MIGRACIÓN (no solo de pase en Andoain): parecido de nubes, viento, presión y temperatura (SIN la dirección del viento,
+// que es lo que decide si pasan por Andoain o por otro sitio) a tus días de pase y a días de migración que no fueron buenos en Andoain
+// (p. ej. 27/10/26 en Otsolepo, Leiza, Areso, Gorriti, con viento del O en Francia); si se parece más a días SIN migración, baja.
+const UMBRAL_MIG = {alta:80, media:65};
+function migracion(f, e, refs) {
+  if (!f || !refs) return null;
+  const extra = (refs.np || []).filter(x => x.esp === e);
+  const pos = refs.filter(x => x.esp === e).concat(extra.filter(x => x.tipo === "mig"));
+  const neg = extra.filter(x => x.tipo === "nomig");
+  let best = 0, bf = null, n70 = 0;
+  pos.forEach(x => { const v = parecido(f, x.f, true); if (v == null) return; if (v > best) { best = v; bf = x; } if (v >= 70) n70++; });
+  if (!bf) return null;
+  let nm = 0, nf = null; neg.forEach(x => { const v = parecido(f, x.f, true); if (v != null && v > nm) { nm = v; nf = x; } });
+  let p = Math.round(best + (n70 >= 2 ? 6 : 0)), sin = null;
+  if (nf && nm >= 65 && nm > best) { p = Math.min(p, 50); sin = {pct: nm, fecha: nf.fecha}; }
+  p = Math.min(100, p);
+  return {p, nivel: p >= UMBRAL_MIG.alta ? "alta" : (p >= UMBRAL_MIG.media ? "media" : "baja"), best, fecha: bf.fecha, mig: bf.tipo === "mig", n70, total: pos.length, sin};
 }
 function mejorParecido(P, esp, dia, refs) {
   const f = rasgos(P, esp, dia); if (!f) return null;
@@ -664,9 +686,10 @@ function analizar(P, hoy, ahora, nDias, refs) {
         r.parecido = refs && refs.length ? mejorParecido(P, e, dia, refs) : null;
         if (r.parecido) { const ap = apoyoPar(r.parecido.sims, escalaApoyo(refs, e)); r.parecido.apoyo = ap;
           if (ap) { const q = puntosPar(r.puntos, ap); if (q !== r.puntos) { r.puntosOrig = r.puntos; r.puntos = q; r.nivel = nivel(q); } } }
+        if (r.parecido) r.migra = migracion(r.parecido.f, e, refs);
         // días de control SIN pase: si se parece más a uno de ellos que a tus días buenos (y ≥ 70 %), no puede pasar de BAJA
         if (r.parecido && refs && refs.np) { let bn = null;
-          refs.np.forEach(x => { if (x.esp !== e) return; const v = parecido(r.parecido.f, x.f); if (v != null && (!bn || v > bn.pct)) bn = {pct: v, fecha: x.fecha}; });
+          refs.np.forEach(x => { if (x.esp !== e || x.tipo === "mig") return; const v = parecido(r.parecido.f, x.f); if (v != null && (!bn || v > bn.pct)) bn = {pct: v, fecha: x.fecha}; });
           if (bn && bn.pct >= 70 && bn.pct > r.parecido.pct && r.puntos > 69) { r.puntosOrig = r.puntosOrig == null ? r.puntos : r.puntosOrig; r.puntos = 69; r.nivel = nivel(69); r.sinPase = bn; r.parecido.sinPase = bn; } }
       }
       fila[e] = r;
@@ -675,7 +698,7 @@ function analizar(P, hoy, ahora, nDias, refs) {
   }
   return res;
 }
-if (typeof module !== "undefined") module.exports = {horasViento, ventana, lluviaSolDia, construir, evalPaloma, evalBecada, evalMalviz, rasgos, parecido, analizar, nivel, escalaApoyo, apoyoPar, puntosPar, DIA, HORA};
+if (typeof module !== "undefined") module.exports = {horasViento, ventana, lluviaSolDia, construir, evalPaloma, evalBecada, evalMalviz, rasgos, parecido, migracion, analizar, nivel, escalaApoyo, apoyoPar, puntosPar, DIA, HORA};
 
 const REFS = [{"esp": "becada", "fecha": "2019-11-20", "f": {"landas.presion": 1013.86, "landas.temp": 2.97, "landas.viento": 10.98, "landas.dir": 104.549, "landas.nubes": 96.4, "burdeos.presion": 1014.02, "burdeos.temp": 2.35, "burdeos.viento": 8.44, "burdeos.dir": 127.672, "burdeos.nubes": 96.3, "poitiers.presion": 1015.49, "poitiers.temp": 2.75, "poitiers.viento": 9.06, "poitiers.dir": 91.909, "poitiers.nubes": 90.8, "andoain.presion": 1011.94, "andoain.temp": 7.72, "andoain.viento": 13.75, "andoain.dir": 170.627, "andoain.nubes": 99.9, "landas.dp": -7.7}}, {"esp": "becada", "fecha": "2020-11-23", "f": {"landas.presion": 1029.05, "landas.temp": 2.99, "landas.viento": 3.26, "landas.dir": 116.296, "landas.nubes": 0.6, "burdeos.presion": 1029.0, "burdeos.temp": 6.2, "burdeos.viento": 3.79, "burdeos.dir": 127.61, "burdeos.nubes": 0.0, "poitiers.presion": 1029.35, "poitiers.temp": 3.05, "poitiers.viento": 5.77, "poitiers.dir": 7.747, "poitiers.nubes": 5.7, "andoain.presion": 1029.1, "andoain.temp": 8.16, "andoain.viento": 8.03, "andoain.dir": 186.175, "andoain.nubes": 16.1, "landas.dp": 1.4}}, {"esp": "becada", "fecha": "2020-11-24", "f": {"landas.presion": 1026.14, "landas.temp": 4.77, "landas.viento": 9.17, "landas.dir": 94.224, "landas.nubes": 96.3, "burdeos.presion": 1026.28, "burdeos.temp": 4.24, "burdeos.viento": 8.7, "burdeos.dir": 121.418, "burdeos.nubes": 97.5, "poitiers.presion": 1027.14, "poitiers.temp": 2.82, "poitiers.viento": 7.91, "poitiers.dir": 96.08, "poitiers.nubes": 53.7, "andoain.presion": 1024.84, "andoain.temp": 7.95, "andoain.viento": 10.52, "andoain.dir": 174.512, "andoain.nubes": 95.2, "landas.dp": -6.0}}, {"esp": "becada", "fecha": "2021-11-22", "f": {"landas.presion": 1012.7, "landas.temp": 6.61, "landas.viento": 6.65, "landas.dir": 70.907, "landas.nubes": 89.9, "burdeos.presion": 1012.79, "burdeos.temp": 6.44, "burdeos.viento": 5.79, "burdeos.dir": 95.217, "burdeos.nubes": 98.8, "poitiers.presion": 1014.45, "poitiers.temp": 6.21, "poitiers.viento": 14.13, "poitiers.dir": 29.919, "poitiers.nubes": 100.0, "andoain.presion": 1013.07, "andoain.temp": 9.28, "andoain.viento": 10.74, "andoain.dir": 262.432, "andoain.nubes": 94.0, "landas.dp": -5.3}}, {"esp": "paloma", "fecha": "2022-10-16", "f": {"landas.presion": 1013.114, "landas.temp": 18.214, "landas.viento": 7.143, "landas.dir": 116.696, "landas.nubes": 33.143, "burdeos.presion": 1012.543, "burdeos.temp": 18.586, "burdeos.viento": 10.786, "burdeos.dir": 131.73, "burdeos.nubes": 72.571, "andoain.presion": 1012.129, "andoain.temp": 21.743, "andoain.viento": 19.657, "andoain.dir": 168.784, "andoain.nubes": 60.571, "landas.dp": -1.5}}, {"esp": "paloma", "fecha": "2022-10-18", "f": {"landas.presion": 1022.243, "landas.temp": 19.9, "landas.viento": 11.314, "landas.dir": 101.289, "landas.nubes": 13.143, "burdeos.presion": 1022.571, "burdeos.temp": 19.8, "burdeos.viento": 13.386, "burdeos.dir": 120.473, "burdeos.nubes": 31.0, "andoain.presion": 1020.814, "andoain.temp": 22.843, "andoain.viento": 22.557, "andoain.dir": 164.705, "andoain.nubes": 11.714, "landas.dp": 1.1}}, {"esp": "paloma", "fecha": "2022-10-25", "f": {"landas.presion": 1014.071, "landas.temp": 18.614, "landas.viento": 11.9, "landas.dir": 121.503, "landas.nubes": 97.286, "burdeos.presion": 1014.157, "burdeos.temp": 16.529, "burdeos.viento": 14.114, "burdeos.dir": 130.903, "burdeos.nubes": 98.571, "andoain.presion": 1012.486, "andoain.temp": 20.757, "andoain.viento": 18.786, "andoain.dir": 167.428, "andoain.nubes": 100.0, "landas.dp": -3.4}}, {"esp": "malviz", "fecha": "2022-10-29", "f": {"landas.presion": 1017.057, "landas.temp": 19.229, "landas.viento": 6.671, "landas.dir": 85.876, "landas.nubes": 99.857, "burdeos.presion": 1017.029, "burdeos.temp": 18.9, "burdeos.viento": 11.2, "burdeos.dir": 135.904, "burdeos.nubes": 96.0, "andoain.presion": 1016.5, "andoain.temp": 22.371, "andoain.viento": 26.029, "andoain.dir": 165.834, "andoain.nubes": 100.0, "landas.dp": -4.7}}, {"esp": "paloma", "fecha": "2022-11-07", "f": {"landas.presion": 1018.0, "landas.temp": 11.643, "landas.viento": 7.071, "landas.dir": 126.63, "landas.nubes": 0.0, "burdeos.presion": 1017.671, "burdeos.temp": 12.2, "burdeos.viento": 10.286, "burdeos.dir": 163.706, "burdeos.nubes": 10.0, "andoain.presion": 1017.043, "andoain.temp": 14.557, "andoain.viento": 11.243, "andoain.dir": 180.497, "andoain.nubes": 9.571, "landas.dp": 1.0}}, {"esp": "paloma", "fecha": "2023-10-28", "f": {"landas.presion": 1003.914, "landas.temp": 15.186, "landas.viento": 13.214, "landas.dir": 204.398, "landas.nubes": 69.143, "burdeos.presion": 1001.8, "burdeos.temp": 15.414, "burdeos.viento": 20.6, "burdeos.dir": 195.696, "burdeos.nubes": 99.571, "andoain.presion": 1003.243, "andoain.temp": 17.943, "andoain.viento": 25.757, "andoain.dir": 193.323, "andoain.nubes": 47.571, "landas.dp": -1.2}}, {"esp": "paloma", "fecha": "2023-11-01", "f": {"landas.presion": 1008.7, "landas.temp": 12.386, "landas.viento": 16.229, "landas.dir": 224.186, "landas.nubes": 93.286, "burdeos.presion": 1006.657, "burdeos.temp": 13.686, "burdeos.viento": 23.714, "burdeos.dir": 224.947, "burdeos.nubes": 73.857, "andoain.presion": 1009.757, "andoain.temp": 14.171, "andoain.viento": 15.414, "andoain.dir": 199.969, "andoain.nubes": 88.429, "landas.dp": -3.9}}, {"esp": "malviz", "fecha": "2023-11-09", "f": {"landas.presion": 1015.443, "landas.temp": 11.757, "landas.viento": 13.357, "landas.dir": 250.297, "landas.nubes": 89.857, "burdeos.presion": 1013.6, "burdeos.temp": 12.129, "burdeos.viento": 16.171, "burdeos.dir": 254.334, "burdeos.nubes": 66.429, "andoain.presion": 1017.086, "andoain.temp": 12.343, "andoain.viento": 11.943, "andoain.dir": 247.508, "andoain.nubes": 72.714, "landas.dp": -4.0}}, {"esp": "paloma", "fecha": "2024-10-21", "f": {"landas.presion": 1021.843, "landas.temp": 16.586, "landas.viento": 5.429, "landas.dir": 90.872, "landas.nubes": 0.0, "burdeos.presion": 1021.943, "burdeos.temp": 16.186, "burdeos.viento": 8.614, "burdeos.dir": 141.205, "burdeos.nubes": 0.0, "andoain.presion": 1021.414, "andoain.temp": 19.886, "andoain.viento": 14.486, "andoain.dir": 195.596, "andoain.nubes": 0.0, "landas.dp": 0.6}}, {"esp": "paloma", "fecha": "2024-11-01", "f": {"landas.presion": 1022.086, "landas.temp": 13.914, "landas.viento": 5.671, "landas.dir": 98.26, "landas.nubes": 100.0, "burdeos.presion": 1022.471, "burdeos.temp": 14.014, "burdeos.viento": 8.071, "burdeos.dir": 94.221, "burdeos.nubes": 0.0, "andoain.presion": 1020.829, "andoain.temp": 17.314, "andoain.viento": 5.1, "andoain.dir": 133.06, "andoain.nubes": 26.571, "landas.dp": 0.1}}].map(r => ({...r, fecha: r.fecha}));
 const TABLA = [{"fecha": "2019-11-20", "esp": "becada", "l0": 1018.1, "l1": 1009.6, "a0": 1017.0, "a1": 1008.2}, {"fecha": "2020-11-23", "esp": "becada", "l0": 1028.2, "l1": 1028.8, "a0": 1027.3, "a1": 1028.5}, {"fecha": "2020-11-24", "esp": "becada", "l0": 1028.8, "l1": 1021.5, "a0": 1028.5, "a1": 1020.5}, {"fecha": "2021-11-22", "esp": "becada", "l0": 1015.5, "l1": 1013.8, "a0": 1016.5, "a1": 1013.3}, {"fecha": "2022-10-16", "esp": "paloma", "l0": 1014.6, "l1": 1012.9, "a0": 1014.3, "a1": 1012.3}, {"fecha": "2022-10-18", "esp": "paloma", "l0": 1019.4, "l1": 1021.2, "a0": 1018.7, "a1": 1020.1}, {"fecha": "2022-10-25", "esp": "paloma", "l0": 1015.3, "l1": 1013.8, "a0": 1015.3, "a1": 1012.9}, {"fecha": "2022-10-29", "esp": "malviz", "l0": 1019.8, "l1": 1017.1, "a0": 1019.1, "a1": 1016.4}, {"fecha": "2022-11-07", "esp": "paloma", "l0": 1017.3, "l1": 1016.5, "a0": 1017.1, "a1": 1015.6}, {"fecha": "2023-10-28", "esp": "paloma", "l0": 1004.8, "l1": 1003.1, "a0": 1005.3, "a1": 1002.6}, {"fecha": "2023-11-01", "esp": "paloma", "l0": 1012.6, "l1": 1008.3, "a0": 1012.6, "a1": 1007.9}, {"fecha": "2023-11-09", "esp": "malviz", "l0": 1019.4, "l1": 1015.0, "a0": 1019.1, "a1": 1016.3}, {"fecha": "2024-10-21", "esp": "paloma", "l0": 1021.1, "l1": 1022.9, "a0": 1020.5, "a1": 1023.2}, {"fecha": "2024-11-01", "esp": "paloma", "l0": 1021.5, "l1": 1021.7, "a0": 1020.8, "a1": 1020.8}];
@@ -741,8 +764,14 @@ function avisosHtml(esps, notif) {
   return h;
 }
 // días de control en los que NO pasó nada (avisa tú y se añaden aquí)
-const NOPASE = [["paloma","2026-10-10"],["paloma","2026-10-11"],["paloma","2026-10-12"],["malviz","2026-10-10"],["malviz","2026-10-11"],["malviz","2026-10-12"]];
-const CLAVE_NP = "pasa_nopase_v2";
+const NOPASE = [["paloma","2026-10-10"],["paloma","2026-10-11"],["paloma","2026-10-12"],["malviz","2026-10-10"],["malviz","2026-10-11"],["malviz","2026-10-12"],
+  // 19-25 oct 2026: prácticamente sin migración en ningún sitio (control de "sin migración")
+  ...["19","20","21","22","23","24","25"].flatMap(d => [["paloma","2026-10-" + d,"nomig"],["malviz","2026-10-" + d,"nomig"]]),
+  // 27 oct 2026: migración de malviz espectacular (también de noche) en Otsolepo, Leiza, Areso y Gorriti, pero no en Andoain
+  ["malviz","2026-10-27","mig"],
+  // 27 oct 2026: de paloma casi nada (ni en Andoain ni se anunció migración): control de "sin migración" para paloma
+  ["paloma","2026-10-27","nomig"]];
+const CLAVE_NP = "pasa_nopase_v3";
 let NP_F = guardado(CLAVE_NP, []);
 const conNP = a => { a.np = NP_F; return a; };
 async function pedirPasado(lat, lon, ini, fin) {
@@ -758,10 +787,14 @@ async function pedirPasado(lat, lon, ini, fin) {
 }
 async function cargarNoPase() {
   const hay = new Set(NP_F.map(x => x.esp + "|" + x.fecha)); let nuevo = false;
-  for (const [esp, fecha] of NOPASE) { if (hay.has(esp + "|" + fecha)) continue;
-    try { const dia = fchD(fecha), P = {};
-      await Promise.all(Object.keys(LUGARES).map(async k => { P[k] = await pedirPasado(...LUGARES[k], isoD(dia - 2*DIA), isoD(dia + DIA)); }));
-      const f = rasgos(P, esp, dia); if (f) { NP_F.push({esp, fecha, f}); nuevo = true; } } catch (e) {} }
+  const fechas = [...new Set(NOPASE.filter(x => !hay.has(x[0] + "|" + x[1])).map(x => x[1]))];
+  for (const fecha of fechas) {
+    for (let intento = 0; intento < 2; intento++) {
+      try { const dia = fchD(fecha), P = {};
+        await Promise.all(Object.keys(LUGARES).map(async k => { P[k] = await pedirPasado(...LUGARES[k], isoD(dia - 2*DIA), isoD(dia + DIA)); }));
+        NOPASE.filter(x => x[1] === fecha).forEach(([esp, , tipo]) => { const f = rasgos(P, esp, dia); if (f) { const o = {esp, fecha, f}; if (tipo) o.tipo = tipo; NP_F.push(o); nuevo = true; } });
+        break; } catch (e) { await new Promise(z => setTimeout(z, 2500)); } }
+    await new Promise(z => setTimeout(z, 500)); }
   if (nuevo) { guardar(CLAVE_NP, NP_F); if (ULTIMA) cargar(); }
 }
 let REFS_F = conNP(REFS.map(r => ({esp:r.esp, fecha:r.fecha, f:{...r.f, esp:r.esp}})));
@@ -915,15 +948,15 @@ function pintarTab(dest, esps, sel, detId) {
       (m.k >= 3 ? `<br><small>Previsión a ${m.k} días, orientativa.</small>` : "") + `</div>`; }
   const filas = RES.map(f => `<tr><th class="d">${etiq(f.dia)}<small>${diaClima(f.dia)}${f.k >= 3 ? "<br><i>orientativa</i>" : ""}</small></th>` +
     esps.map(e => { const r = f[e];
-      if (!r) return `<td class="na">–</td>`;
+      if (!r) return `<td class="na">–</td><td class="na">–</td>`;
       const on = sel && sel.k === f.k && sel.e === e;
       const cs = consenso(r);
       return `<td><button type="button" class="c ${r.nivel}" data-k="${f.k}" data-e="${e}" aria-pressed="${on}">` +
         `<span class="n">${r.puntos}</span><span class="l">${r.nivel.toUpperCase()}</span>` +
         (cs ? `<span class="p">${cs.si}/${cs.n} modelos</span>` : "") +
-        `</button></td>`; }).join("") + `</tr>`).join("");
+        `</button></td>` + (r.migra ? `<td class="mg"><button type="button" class="g ${r.migra.nivel}" data-k="${f.k}" data-e="${e}" title="Probabilidad de migración (no solo Andoain)">${r.migra.p}</button></td>` : `<td class="na">–</td>`); }).join("") + `</tr>`).join("");
   $(dest).innerHTML = avisosHtml(esps, dest === "prev") + top +
-    `<div class="wrap"><table><tr><th></th>${esps.map(e => COL[e]).join("")}</tr>${filas}</table></div>` +
+    `<div class="wrap"><table><tr><th></th>${esps.map(e => COL[e] + '<th class="mgh">Migra-<br>ción</th>').join("")}</tr>${filas}</table></div>` +
     `<div class="leg"><span><i style="background:var(--alta)"></i>Alta ≥ ${UMBRAL.alta}</span><span><i style="background:var(--media)"></i>Media ≥ ${UMBRAL.media}</span><span><i style="background:var(--line)"></i>Baja</span><span>«3/5 modelos»: cuántos dan media o alta</span></div>` +
     (MODELOS_TXT ? `<p class="sub" style="margin-top:8px">${esc(MODELOS_TXT)}</p>` : "") +
     `<div id="${detId}"></div>` +
@@ -932,8 +965,15 @@ function pintarTab(dest, esps, sel, detId) {
   $(dest).querySelectorAll("[data-visto]").forEach(v => v.addEventListener("click", () => { AVISOS = []; guardar("pasa_avisos", []);
     document.title = "Pasa Andoain"; pintar(); }));
   const nb = $("notif"); if (nb) nb.addEventListener("click", () => { try { Notification.requestPermission().then(pintar); } catch (e) {} });
-  $(dest).querySelectorAll(".c").forEach(b => b.addEventListener("click", () => {
+  $(dest).querySelectorAll(".c, .g").forEach(b => b.addEventListener("click", () => {
     const s = {k:+b.dataset.k, e:b.dataset.e}; if (s.e === "becada") SELB = s; else SEL = s; pintar(); $(detId).scrollIntoView({behavior:"smooth", block:"nearest"}); }));
+}
+function migraHtml(m) {
+  const f = s => s.split("-").reverse().join("/");
+  let t = `<div class="par"><b>Probabilidad de migración: ${m.p} % ${m.nivel.toUpperCase()}</b> <span class="sub">(no es lo mismo que cazar en Andoain)</span><br>` +
+    `Se basa en nubes, viento, presión y temperatura (Francia y Andoain), <b>sin la dirección del viento</b>, que es lo que decide si pasan por Andoain o por otro sitio: se parece un ${Math.round(m.best)} % a ${m.mig ? "un día de migración fuera de Andoain" : "uno de tus días de pase"} (${f(m.fecha)}), y ${m.n70} de ${m.total} días superan el 70 %.`;
+  if (m.sin) t += `<br>Se parece más (${Math.round(m.sin.pct)} %) a un día <b>sin migración</b> (${f(m.sin.fecha)}): por eso no pasa de 50.`;
+  return t + `<br><span class="sub">Alta ≥ ${UMBRAL_MIG.alta} · Media ≥ ${UMBRAL_MIG.media}. Orientativa: pocos días de referencia. Si la migración es buena pero Andoain no, suele ser por la dirección del viento (p. ej. del O en Francia).</span></div>`;
 }
 function detalle(SEL, detId) {
   if (!SEL || !RES[SEL.k] || !RES[SEL.k][SEL.e]) { $(detId).innerHTML = ""; return; }
@@ -941,6 +981,7 @@ function detalle(SEL, detId) {
   $(detId).innerHTML = `<section class="det"><h2>${NOMBRE[SEL.e]} · ${cuando(f, SEL.e)}</h2>` +
     `<div><b>${r.puntos}/100 ${r.nivel.toUpperCase()}</b> · ${esc(r.resumen)}</div>` +
     (r.parecido ? parecidoHtml(r.parecido, SEL.e) : "") +
+    (r.migra ? migraHtml(r.migra) : "") +
     (r.nota ? `<p class="nota">${esc(r.nota)}</p>` : `<p class="nota"></p>`) +
     `<ul class="cr">` + r.criterios.map(x => `<li><span class="m ${x.ok ? "si" : "no"}">${x.ok ? "✔" : "✘"}</span><span>${esc(x.texto)}</span><span class="pt">${x.pts}/${x.max}</span></li>`).join("") + `</ul>` +
     contrasteHtml(r) +
@@ -996,9 +1037,9 @@ const HIST = [
   {esp:"becada", fecha:"2023-12-26", local:true},
   {esp:"paloma", fecha:"2022-10-16"}, {esp:"paloma", fecha:"2022-10-18"}, {esp:"paloma", fecha:"2022-10-25"}, {esp:"paloma", fecha:"2022-11-07"},
   {esp:"paloma", fecha:"2023-10-28"}, {esp:"paloma", fecha:"2023-10-29"}, {esp:"paloma", fecha:"2023-11-01"}, {esp:"paloma", fecha:"2023-11-08"},
-  {esp:"paloma", fecha:"2024-10-21"}, {esp:"paloma", fecha:"2024-11-01"}, {esp:"paloma", fecha:"2024-11-08"}, {esp:"paloma", fecha:"2025-10-28"}, {esp:"paloma", fecha:"2025-11-11"},
+  {esp:"paloma", fecha:"2024-10-21"}, {esp:"paloma", fecha:"2024-11-01"}, {esp:"paloma", fecha:"2024-11-08"}, {esp:"paloma", fecha:"2025-10-28"}, {esp:"paloma", fecha:"2025-11-11"}, {esp:"paloma", fecha:"2026-10-15"},
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
-  {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"},
+  {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"}, {esp:"malviz", fecha:"2026-10-15"},
 ];
 const CLAVE_H = "pasa_hist_v15"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
@@ -1030,7 +1071,7 @@ async function pedirHist(lat, lon, ini, fin) {
 }
 async function datosDe(x) {
   const dia = diaPase(x), P = {};
-  await Promise.all(Object.keys(LUGARES).map(async k => { P[k] = await pedirHist(...LUGARES[k], isoD(dia - 2*DIA), isoD(dia + DIA)); }));
+  await Promise.all(Object.keys(LUGARES).map(async k => { P[k] = await (dia > Date.now() - 10*DIA ? pedirPasado : pedirHist)(...LUGARES[k], isoD(dia - 2*DIA), isoD(dia + DIA)); }));
   const ev = ({paloma:evalPaloma, becada:evalBecada, malviz:evalMalviz})[x.esp](P, dia);
   const [a, b] = ventana(x.esp, dia), sA = estadisticas(P.andoain, a, b), sL = estadisticas(P.landas, a, b);
   const dm = (k, d0) => { const v = []; P[k].t.forEach((t,i) => { if (t >= d0 && t < d0 + DIA && P[k].pressure_msl[i] != null) v.push(P[k].pressure_msl[i]); });
