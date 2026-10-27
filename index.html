@@ -690,7 +690,7 @@ function analizar(P, hoy, ahora, nDias, refs) {
         // días de control SIN pase: si se parece más a uno de ellos que a tus días buenos (y ≥ 70 %), no puede pasar de BAJA
         if (r.parecido && refs && refs.np) { let bn = null;
           refs.np.forEach(x => { if (x.esp !== e || x.tipo === "mig") return; const v = parecido(r.parecido.f, x.f); if (v != null && (!bn || v > bn.pct)) bn = {pct: v, fecha: x.fecha}; });
-          if (bn && bn.pct >= 70 && bn.pct > r.parecido.pct && r.puntos > 69) { r.puntosOrig = r.puntosOrig == null ? r.puntos : r.puntosOrig; r.puntos = 69; r.nivel = nivel(69); r.sinPase = bn; r.parecido.sinPase = bn; } }
+          if (bn && bn.pct >= 75 && bn.pct > r.parecido.pct && r.puntos > 69) { r.puntosOrig = r.puntosOrig == null ? r.puntos : r.puntosOrig; r.puntos = 69; r.nivel = nivel(69); r.sinPase = bn; r.parecido.sinPase = bn; } }
       }
       fila[e] = r;
     }
@@ -771,7 +771,7 @@ const NOPASE = [["paloma","2026-10-10"],["paloma","2026-10-11"],["paloma","2026-
   ["malviz","2026-10-27","mig"],
   // 27 oct 2026: de paloma casi nada (ni en Andoain ni se anunció migración): control de "sin migración" para paloma
   ["paloma","2026-10-27","nomig"]];
-const CLAVE_NP = "pasa_nopase_v3";
+const CLAVE_NP = "pasa_nopase_v4";
 let NP_F = guardado(CLAVE_NP, []);
 const conNP = a => { a.np = NP_F; return a; };
 async function pedirPasado(lat, lon, ini, fin) {
@@ -785,7 +785,10 @@ async function pedirPasado(lat, lon, ini, fin) {
   if (OBLIG.some(v => !cols[v])) throw new Error("faltan variables");
   return construir(h.time.map(t => Date.parse(t + ":00Z")), cols);
 }
+let NP_CARGANDO = false;
 async function cargarNoPase() {
+  if (NP_CARGANDO) return; NP_CARGANDO = true;
+  { const vistos = new Set(); const sin = NP_F.filter(x => { const k = x.esp + x.fecha; if (vistos.has(k)) return false; vistos.add(k); return true; }); if (sin.length !== NP_F.length) { NP_F.length = 0; sin.forEach(x => NP_F.push(x)); } }
   const hay = new Set(NP_F.map(x => x.esp + "|" + x.fecha)); let nuevo = false;
   const fechas = [...new Set(NOPASE.filter(x => !hay.has(x[0] + "|" + x[1])).map(x => x[1]))];
   for (const fecha of fechas) {
@@ -795,6 +798,7 @@ async function cargarNoPase() {
         NOPASE.filter(x => x[1] === fecha).forEach(([esp, , tipo]) => { const f = rasgos(P, esp, dia); if (f) { const o = {esp, fecha, f}; if (tipo) o.tipo = tipo; NP_F.push(o); nuevo = true; } });
         break; } catch (e) { await new Promise(z => setTimeout(z, 2500)); } }
     await new Promise(z => setTimeout(z, 500)); }
+  NP_CARGANDO = false;
   if (nuevo) { guardar(CLAVE_NP, NP_F); if (ULTIMA) cargar(); }
 }
 let REFS_F = conNP(REFS.map(r => ({esp:r.esp, fecha:r.fecha, f:{...r.f, esp:r.esp}})));
