@@ -172,7 +172,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li><b>La presión alta o baja:</b> tus días van de 1000 a 1022 hPa y solo 7 de 13 pasan de 1017, igual que la mitad de los días de la temporada. Ya no puntúa el valor de la presión, solo que se mantenga estable.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso no pasa de 50; hasta 10° fuera de esos límites puntúa la mitad y no pasa de 85, para no perder los días al borde) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota a 50 si se prevé niebla por la mañana (humedad media de 96 % o más de 7 a 10 h en Andoain o Urrugne, sin lluvia): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div></details>
+<p>Exige viento del SE-S en Euskadi y del E-SO en Landas (sin eso la nota baja a entre 30 y 69 según lo cerca que esté y cuánto se parezca a tus días buenos; hasta 10° fuera de esos límites puntúa la mitad y no pasa de 85) y puntúa fuerza del viento, temperatura, presión estable y lluvia. También limita la nota si se prevé niebla por la mañana (visibilidad bajo 1 km o humedad ≥96 % de 7 a 11 h): máximo 40 si es en Andoain o la frontera, 55 si es solo en Francia (Landas, Burdeos, Poitiers): ninguno de tus 13 días tuvo niebla (el más húmedo, el 28/10/25, llegó al 93 %), y ese tipo de mañana se da en el 16 % de los días de la temporada. Con estas reglas, 12 de tus 13 días sacan 90 o más (el 13º es el 1/11/23, el de la lluvia), frente al 21 % de los días de la temporada.</p></div></details>
 
 <details class="acc"><summary>Malviz y zorzal <span class="chip">17 días · confianza media-baja</span></summary><div class="accb">
 <p class="nota-m">Tus 12 días de la lista más 5 días de la semana del 23 al 28/10/22 (23, 24, 26, 27 y 28) que me dijiste que fue de pase masivo cada día (el 25 y el 29 ya están en tu lista).</p>
@@ -196,7 +196,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 <li>El viento N-NE de la bibliografía no salió en ninguno de tus días, ni el frío. Esa regla ya no se usa.</li>
 </ul>
 <h4>Qué hace la página con esto</h4>
-<p>Calcula los patrones y se queda con el que más puntos da. El de calor y viento del sur exige 16 °C o más en Landas y viento del SSE al OSO en Euskadi (sin eso no pasa de 50). La niebla por la mañana limita la nota a 50, igual que en la paloma. Tus 17 días tampoco tuvieron niebla: el 9/11/23 tuvo humedad del 99 %, pero con lluvia, que no cuento como niebla. Hay además un tercer patrón de día claro con viento flojo del ESE, que solo viene de tu día del 1/11/24 ★ y no pasa de 75. Con todos los patrones, 15 de tus 17 días sacan 90 o más (y 16 de 17 sacan 70 o más), frente al 33 % de los días de la temporada con 90 o más. Es la especie con más avisos: 1 de cada 3 días de la temporada sale ALTA. El segundo patrón sale de una sola semana, así que es el menos fiable.</p></div></details>
+<p>Calcula los patrones y se queda con el que más puntos da. El de calor y viento del sur exige 16 °C o más en Landas y viento del SSE al OSO en Euskadi (sin eso la nota baja a entre 30 y 69 según lo cerca que esté). La niebla por la mañana limita la nota igual que en la paloma (40 en Euskadi o frontera, 55 en Francia). Tus 17 días tampoco tuvieron niebla: el 9/11/23 tuvo humedad del 99 %, pero con lluvia, que no cuento como niebla. Hay además un tercer patrón de día claro con viento flojo del ESE, que solo viene de tu día del 1/11/24 ★ y no pasa de 75. Con todos los patrones, 15 de tus 17 días sacan 90 o más (y 16 de 17 sacan 70 o más), frente al 33 % de los días de la temporada con 90 o más. Es la especie con más avisos: 1 de cada 3 días de la temporada sale ALTA. El segundo patrón sale de una sola semana, así que es el menos fiable.</p></div></details>
 <details class="acc"><summary>Para las tres especies</summary><div class="accb">
 <ul>
 <li><b>Viento flojo en Landas:</b> casi todos los días buenos tienen 16 km/h o menos, pero en la temporada ocurre el 92 % de los días, así que no distingue nada.</li>
@@ -278,6 +278,7 @@ ul.mods li{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:8px;
 const LUGARES = {landas:[43.89,-0.50], burdeos:[44.83,-0.70], poitiers:[46.58,0.34],
                  urrugne:[43.37,-1.70], andoain:[43.22,-2.02]};
 const VARS = ["pressure_msl","temperature_2m","cloud_cover","wind_speed_10m","wind_direction_10m","precipitation","wind_gusts_10m","sunshine_duration","relative_humidity_2m"];
+const VARS_P = VARS.concat(["visibility"]); // visibilidad: solo en la previsión (no existe en el archivo histórico)
 const ESPECIES = ["paloma","becada","malviz"];
 const NOMBRE = {paloma:"Paloma", becada:"Becada", malviz:"Malviz/zorzal"};
 const UMBRAL = {alta:90, media:70, parecido:70};
@@ -308,7 +309,7 @@ function dirComb(sa, sb) {
 }
 function construir(t, cols) {
   const D = {t, pos: new Map(t.map((x,i) => [x,i]))};
-  VARS.forEach(v => { if (cols[v]) D[v] = cols[v]; });
+  VARS_P.forEach(v => { if (cols[v]) D[v] = cols[v]; });
   return D;
 }
 function estadisticas(D, a, b) {
@@ -335,26 +336,47 @@ function cambio24(D, v, fin) {
 function sumaLluvia(...st) { const v = st.map(s => s.lluvia).filter(x => x != null);
   return v.length ? v.reduce((p,c)=>p+c,0) : null; }
 // niebla por la mañana (7-10 h): humedad media de 96 % o más en Andoain o Urrugne y sin lluvia (la humedad alta con lluvia no es niebla)
+// NIEBLA de la mañana (7-11 h) en Euskadi (Andoain), frontera (Urrugne) y Francia (Landas, Burdeos, Poitiers).
+// Con visibilidad (Open-Meteo): niebla = visibilidad < 1000 m en 2 o más horas. Sin visibilidad (algunos modelos): humedad media ≥ 96 % sin lluvia.
+const ZONAS_NIEBLA = [["andoain","Andoain","Euskadi"],["urrugne","Urrugne (frontera)","frontera"],["landas","Landas","Francia"],["burdeos","Burdeos","Francia"],["poitiers","Poitiers","Francia"]];
 function nieblaManana(P, dia) {
-  let rhMax = null, lluvia = 0;
-  for (const k of ["andoain","urrugne"]) { const D = P[k]; if (!D || !D.relative_humidity_2m) continue;
-    const v = [], ll = []; D.t.forEach((t,i) => { if (t >= hh(dia,7) && t <= hh(dia,10)) { if (D.relative_humidity_2m[i] != null) v.push(D.relative_humidity_2m[i]); if (D.precipitation && D.precipitation[i] != null) ll.push(D.precipitation[i]); } });
-    if (v.length >= 3) { const m = v.reduce((p,c)=>p+c,0)/v.length; if (rhMax == null || m > rhMax) rhMax = m; lluvia = Math.max(lluvia, ll.reduce((p,c)=>p+c,0)); } }
-  return rhMax == null ? null : {rh: rhMax, probable: rhMax >= 96 && lluvia <= 0.5};
+  const hay = [], det = []; let sin = 0;
+  for (const [k, nom, zona] of ZONAS_NIEBLA) { const D = P[k]; if (!D) { sin++; continue; }
+    const rh = [], vis = [], ll = [];
+    D.t.forEach((t, i) => { if (t >= hh(dia,7) && t <= hh(dia,11)) { if (D.relative_humidity_2m && D.relative_humidity_2m[i] != null) rh.push(D.relative_humidity_2m[i]);
+      if (D.visibility && D.visibility[i] != null) vis.push(D.visibility[i]); if (D.precipitation && D.precipitation[i] != null) ll.push(D.precipitation[i]); } });
+    let niebla = false, dato = null;
+    if (vis.length >= 3) { const n = vis.filter(v => v < 1000).length; niebla = n >= 2; dato = "visibilidad mín. " + f0(Math.min(...vis)) + " m"; }
+    else if (rh.length >= 3) { const m = rh.reduce((p,c)=>p+c,0)/rh.length; niebla = m >= 96 && ll.reduce((p,c)=>p+c,0) <= 0.5; dato = "humedad " + f0(m) + " %"; }
+    else { sin++; continue; }
+    det.push({k, nom, zona, niebla, dato}); if (niebla) hay.push({nom, zona, dato}); }
+  if (!det.length) return null;
+  const local = hay.some(x => x.zona !== "Francia"), francia = hay.some(x => x.zona === "Francia");
+  return {hay: hay.length > 0, local, francia, lugares: hay, det, sin};
 }
 function aplicarNiebla(r, P, dia) {
-  const n = nieblaManana(P, dia); if (!n || !n.probable) return;
-  r.puntos = Math.min(r.puntos, 50);
-  r.nota = (r.nota ? r.nota + " " : "") + "Niebla probable por la mañana (humedad " + f0(n.rh) + " % de 7 a 10 h, sin lluvia): no pasa de 50.";
+  const n = nieblaManana(P, dia); if (!n) return;
+  r.niebla = {hay: n.hay, local: n.local, francia: n.francia, lugares: n.lugares.map(x => x.nom + " (" + x.dato + ")"), sin: n.sin};
+  if (!n.hay) return;
+  const tope = n.local ? 40 : 55;
+  r.puntos = Math.min(r.puntos, tope);
+  r.nota = (r.nota ? r.nota + " " : "") + "NIEBLA prevista por la mañana en " + r.niebla.lugares.join(", ") + ": " + (n.local ? "en Euskadi o en la frontera, no pasa de 40." : "en Francia, no pasa de 55.");
 }
 function crit(texto, ok, max, pts) { return {texto, ok, max, pts: pts == null ? (ok ? max : 0) : pts}; }
 function maxRacha(U, A) { const r = [U.racha, A.racha].filter(x => x != null); return r.length ? Math.max(...r) : null; }
-function cerrar(c, resumen, nota, limiteCal, claveOk) {
+// Si falla la condición clave la nota queda siempre por debajo de 70 (BAJA), pero ya no en un 50 plano: sube de 30 a 69 según lo cerca que
+// esté la condición clave (claveFrac, de 0 a 1) y, en analizar, según lo que se parezca a tus días buenos.
+const cotaClave = f => 30 + Math.round(39*Math.max(0, Math.min(1, f)));
+function cerrar(c, resumen, nota, limiteCal, claveOk, claveFrac) {
   let total = c.reduce((p,x) => p + x.pts, 0);
   const fuera = limiteCal === false || (nota && nota.startsWith("Fuera"));
   if (fuera) total = Math.min(total, 40);
-  if (claveOk === false) total = Math.min(total, 50);
-  return {puntos: Math.round(total), criterios: c, resumen, nota};
+  const bruto = total;
+  let cota = null;
+  if (claveOk === false) { cota = claveFrac == null ? 50 : cotaClave(claveFrac); total = Math.min(total, cota); }
+  const r = {puntos: Math.round(total), criterios: c, resumen, nota};
+  if (claveOk === false && claveFrac != null) { r.claveOk = false; r.clave = claveFrac; r.bruto = Math.round(bruto); r.cota = cota; }
+  return r;
 }
 function todos(P, ks, a, b) {
   const S = {};
@@ -405,9 +427,9 @@ function evalPaloma(P, dia) {
   const resumen = `viento Andoain ${rosa(dE)} ${f0(vE)} km/h, Landas ${rosa(L.dir)} ${f0(L.viento)} km/h, ${f0(L.presion)} hPa`;
   let nota = enC ? null : "Fuera del calendario habitual (10 oct - 30 nov)";
   const claveOk = (dEok || dEcerca) && (dLok || dLcerca);
-  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (al menos la mitad de las horas del SE al S en Andoain (y la media dentro del sector con margen) y del E al SO en Landas, con 10° de margen): no pasa de 50.";
+  if (!claveOk) nota = (nota ? nota + " " : "") + "Falta la dirección del viento (al menos la mitad de las horas del SE al S en Andoain (y la media dentro del sector con margen) y del E al SO en Landas, con 10° de margen): queda en BAJA (por debajo de 70), más alta cuanto más cerca esté y más se parezca a tus días buenos.";
   else if (!(dEok && dLok)) nota = (nota ? nota + " " : "") + "La dirección no se mantiene todas las horas dentro del sector (o está al borde): puntúa menos en ese criterio y no llega a ALTA.";
-  const r = cerrar(c, resumen, nota, enC ? undefined : false, claveOk);
+  const r = cerrar(c, resumen, nota, enC ? undefined : false, claveOk, (ptE + ptL)/40);
   if (claveOk && !(dEok && dLok)) r.puntos = Math.min(r.puntos, 85);
   // la paloma no pasa con lluvia: tope duro según la lluvia en Euskadi (Andoain/Urrugne) y en Landas
   const llE = [A.lluvia, U.lluvia].filter(x => x != null), mE = llE.length ? Math.max(...llE) : null;
@@ -521,19 +543,19 @@ function evalMalviz(P, dia) {
   const claveE = dirE2 && solOk && vE <= 10;
   const claveC = fina && (dirS || dirN);
   const sum = c => c.reduce((p,x)=>p+x.pts,0);
-  let c, claveOk, patron, resumen;
-  if (claveE && sum(cE) > Math.max(sum(cA), sum(cB), sum(cC))) { c = cE; claveOk = true; patron = "Patrón día claro con viento flojo del ESE (solo 1 día tuyo, el 1/11/24 ★: no pasa de 75)";
+  let c, claveOk, patron, resumen, frac = null;
+  if (claveE && sum(cE) > Math.max(sum(cA), sum(cB), sum(cC))) { c = cE; claveOk = true; frac = 1; patron = "Patrón día claro con viento flojo del ESE (solo 1 día tuyo, el 1/11/24 ★: no pasa de 75)";
     resumen = `sol ${A.sol == null ? "?" : f1(A.sol)} h, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
-  else if (sum(cC) > Math.max(sum(cA), sum(cB))) { c = cC; claveOk = claveC; patron = "Patrón día lluvioso (4 de tus días): lluvia fina y continua, cielo cubierto, poco viento en Francia" + (dirN && !dirS ? ". Con viento del N no lo has confirmado con ningún día: no pasa de 75" : "");
+  else if (sum(cC) > Math.max(sum(cA), sum(cB))) { c = cC; claveOk = claveC; frac = (cC[0].pts/30 + cC[3].pts/15)/2; patron = "Patrón día lluvioso (4 de tus días): lluvia fina y continua, cielo cubierto, poco viento en Francia" + (dirN && !dirS ? ". Con viento del N no lo has confirmado con ningún día: no pasa de 75" : "");
     resumen = `lluvia ${lluDia == null ? "?" : f1(lluDia)} mm, nubes ${f0(nFr)} %, viento Euskadi ${rosa(dE)} ${f0(vE)} km/h`; }
-  else if (sum(cA) >= sum(cB)) { c = cA; claveOk = nubOk && dirOk && vOkA; patron = "Patrón nublado y templado (6 de tus días)";
+  else if (sum(cA) >= sum(cB)) { c = cA; claveOk = nubOk && dirOk && vOkA; frac = (cA[0].pts/25 + cDir.pts/20 + cFuerzaA.pts/10)/3; patron = "Patrón nublado y templado (6 de tus días)";
     resumen = `nubes ${f0(nubes)} %, ${f1(L.temp)} °C, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
-  else { c = cB; claveOk = calor && dirOk && vOkB; patron = "Patrón calor y viento del S (la semana del 23 al 29/10/22)";
+  else { c = cB; claveOk = calor && dirOk && vOkB; frac = (cB[0].pts/30 + cB[1].pts/30 + cFuerzaB.pts/10)/3; patron = "Patrón calor y viento del S (la semana del 23 al 29/10/22)";
     resumen = `${f1(L.temp)} °C en Landas, viento Andoain ${rosa(dE)} ${f0(vE)} km/h`; }
   let nota = patron + ".";
-  if (!claveOk) nota += " Falta la condición clave: no pasa de 50.";
+  if (!claveOk) nota += " Falta la condición clave: queda en BAJA (por debajo de 70), más alta cuanto más cerca esté y más se parezca a tus días buenos.";
   if (!enC) nota += " Fuera del calendario habitual.";
-  const r = cerrar(c, resumen, nota, enC, claveOk);
+  const r = cerrar(c, resumen, nota, enC, claveOk, frac);
   if (c === cC && dirN && !dirS) r.puntos = Math.min(r.puntos, 75);
   if (c === cE) r.puntos = Math.min(r.puntos, 75);
   aplicarNiebla(r, P, dia);
@@ -686,6 +708,10 @@ function analizar(P, hoy, ahora, nDias, refs) {
         r.parecido = refs && refs.length ? mejorParecido(P, e, dia, refs) : null;
         if (r.parecido) { const ap = apoyoPar(r.parecido.sims, escalaApoyo(refs, e)); r.parecido.apoyo = ap;
           if (ap) { const q = puntosPar(r.puntos, ap); if (q !== r.puntos) { r.puntosOrig = r.puntos; r.puntos = q; r.nivel = nivel(q); } } }
+        // día que falla la condición clave: su nota (siempre en BAJA) sube con el parecido a tus días buenos (del 40 % al 70 %)
+        if (r.parecido && r.claveOk === false && r.clave != null && r.puntos === Math.min(r.bruto, r.cota)) {
+          const s = Math.max(0, Math.min(1, (r.parecido.pct - 40)/30)), q = 0.35*r.clave + 0.65*s, np = Math.min(r.bruto, cotaClave(q));
+          if (np !== r.puntos) { r.puntosOrig = r.puntos; r.puntos = np; r.nivel = nivel(np); r.gradoSim = {s, q}; } }
         if (r.parecido) r.migra = migracion(r.parecido.f, e, refs);
         // días de control SIN pase: si se parece más a uno de ellos que a tus días buenos (y ≥ 70 %), no puede pasar de BAJA
         if (r.parecido && refs && refs.np) { let bn = null;
@@ -770,7 +796,8 @@ const NOPASE = [["paloma","2026-10-10"],["paloma","2026-10-11"],["paloma","2026-
   // 27 oct 2026: migración de malviz espectacular (también de noche) en Otsolepo, Leiza, Areso y Gorriti, pero no en Andoain
   ["malviz","2026-10-27","mig"],
   // 27 oct 2026: de paloma casi nada (ni en Andoain ni se anunció migración): control de "sin migración" para paloma
-  ["paloma","2026-10-27","nomig"]];
+  ["paloma","2026-10-27","nomig"],
+  ["paloma","2026-10-29","mig"]];
 const CLAVE_NP = "pasa_nopase_v4";
 let NP_F = guardado(CLAVE_NP, []);
 const conNP = a => { a.np = NP_F; return a; };
@@ -816,7 +843,7 @@ function elegir(h, v) {
   return k ? h[k] : null;
 }
 async function pedir(lat, lon, modelo) {
-  const p = {latitude:lat, longitude:lon, hourly:VARS.join(","), timezone:"Europe/Madrid",
+  const p = {latitude:lat, longitude:lon, hourly:VARS_P.join(","), timezone:"Europe/Madrid",
     wind_speed_unit:"kmh", past_days:2, forecast_days:9};
   if (modelo) p.models = modelo;
   let r = null;
@@ -824,7 +851,7 @@ async function pedir(lat, lon, modelo) {
     if (r.status !== 429 || i === 3) break; await new Promise(z => setTimeout(z, 1200*(i+1) + Math.random()*800)); }
   if (!r.ok) throw new Error("Open-Meteo respondió " + r.status);
   const h = (await r.json()).hourly;
-  const cols = {}; VARS.forEach(v => { const c = elegir(h, v); if (c) cols[v] = c; });
+  const cols = {}; VARS_P.forEach(v => { const c = elegir(h, v); if (c) cols[v] = c; });
   if (OBLIG.some(v => !cols[v])) throw new Error("faltan variables");
   return construir(h.time.map(t => Date.parse(t + ":00Z")), cols);
 }
@@ -956,7 +983,7 @@ function pintarTab(dest, esps, sel, detId) {
       const on = sel && sel.k === f.k && sel.e === e;
       const cs = consenso(r);
       return `<td><button type="button" class="c ${r.nivel}" data-k="${f.k}" data-e="${e}" aria-pressed="${on}">` +
-        `<span class="n">${r.puntos}</span><span class="l">${r.nivel.toUpperCase()}</span>` +
+        `<span class="n">${r.puntos}</span><span class="l">${r.nivel.toUpperCase()}</span>${r.niebla && r.niebla.hay ? '<span class="p" title="Niebla prevista">🌫 niebla</span>' : ""}` +
         (cs ? `<span class="p">${cs.si}/${cs.n} modelos</span>` : "") +
         `</button></td>` + (r.migra ? `<td class="mg"><button type="button" class="g ${r.migra.nivel}" data-k="${f.k}" data-e="${e}" title="Probabilidad de migración (no solo Andoain)">${r.migra.p}</button></td>` : `<td class="na">–</td>`); }).join("") + `</tr>`).join("");
   $(dest).innerHTML = avisosHtml(esps, dest === "prev") + top +
@@ -972,11 +999,17 @@ function pintarTab(dest, esps, sel, detId) {
   $(dest).querySelectorAll(".c, .g").forEach(b => b.addEventListener("click", () => {
     const s = {k:+b.dataset.k, e:b.dataset.e}; if (s.e === "becada") SELB = s; else SEL = s; pintar(); $(detId).scrollIntoView({behavior:"smooth", block:"nearest"}); }));
 }
+function nieblaHtml(r) {
+  if (!r.niebla) return "";
+  const n = r.niebla;
+  return n.hay ? `<div class="par"><b>🌫 Niebla prevista por la mañana (7-11 h):</b> ${esc(n.lugares.join(", "))}.<br><span class="sub">${n.local ? "Hay niebla en Euskadi o en la frontera: la nota no pasa de 40." : "Hay niebla en Francia: la nota no pasa de 55."}</span></div>`
+    : `<div class="par"><b>Sin niebla prevista</b> por la mañana (7-11 h) en Andoain, Urrugne, Landas, Burdeos ni Poitiers.${n.sin ? ' <span class="sub">(Sin datos en ' + n.sin + " de 5 puntos.)</span>" : ""}</div>`;
+}
 function migraHtml(m) {
   const f = s => s.split("-").reverse().join("/");
   let t = `<div class="par"><b>Probabilidad de migración: ${m.p} % ${m.nivel.toUpperCase()}</b> <span class="sub">(no es lo mismo que cazar en Andoain)</span><br>` +
     `Se basa en nubes, viento, presión y temperatura (Francia y Andoain), <b>sin la dirección del viento</b>, que es lo que decide si pasan por Andoain o por otro sitio: se parece un ${Math.round(m.best)} % a ${m.mig ? "un día de migración fuera de Andoain" : "uno de tus días de pase"} (${f(m.fecha)}), y ${m.n70} de ${m.total} días superan el 70 %.`;
-  if (m.sin) t += `<br>Se parece más (${Math.round(m.sin.pct)} %) a un día <b>sin migración</b> (${f(m.sin.fecha)}): por eso no pasa de 50.`;
+  if (m.sin) t += `<br>Se parece más (${Math.round(m.sin.pct)} %) a un día <b>sin migración</b> (${f(m.sin.fecha)}): por eso su probabilidad no pasa de 50.`;
   return t + `<br><span class="sub">Alta ≥ ${UMBRAL_MIG.alta} · Media ≥ ${UMBRAL_MIG.media}. Orientativa: pocos días de referencia. Si la migración es buena pero Andoain no, suele ser por la dirección del viento (p. ej. del O en Francia).</span></div>`;
 }
 function detalle(SEL, detId) {
@@ -985,6 +1018,7 @@ function detalle(SEL, detId) {
   $(detId).innerHTML = `<section class="det"><h2>${NOMBRE[SEL.e]} · ${cuando(f, SEL.e)}</h2>` +
     `<div><b>${r.puntos}/100 ${r.nivel.toUpperCase()}</b> · ${esc(r.resumen)}</div>` +
     (r.parecido ? parecidoHtml(r.parecido, SEL.e) : "") +
+    nieblaHtml(r) +
     (r.migra ? migraHtml(r.migra) : "") +
     (r.nota ? `<p class="nota">${esc(r.nota)}</p>` : `<p class="nota"></p>`) +
     `<ul class="cr">` + r.criterios.map(x => `<li><span class="m ${x.ok ? "si" : "no"}">${x.ok ? "✔" : "✘"}</span><span>${esc(x.texto)}</span><span class="pt">${x.pts}/${x.max}</span></li>`).join("") + `</ul>` +
@@ -1045,7 +1079,7 @@ const HIST = [
   {esp:"malviz", fecha:"2022-10-23", semana:true}, {esp:"malviz", fecha:"2022-10-24", semana:true}, {esp:"malviz", fecha:"2022-10-25"}, {esp:"malviz", fecha:"2022-10-26", semana:true}, {esp:"malviz", fecha:"2022-10-27", semana:true}, {esp:"malviz", fecha:"2022-10-28", semana:true}, {esp:"malviz", fecha:"2022-10-29"}, {esp:"malviz", fecha:"2023-10-16"}, {esp:"malviz", fecha:"2023-11-01"}, {esp:"malviz", fecha:"2023-11-02"}, {esp:"malviz", fecha:"2023-11-09"}, {esp:"malviz", fecha:"2024-10-12"}, {esp:"malviz", fecha:"2024-11-01"}, {esp:"malviz", fecha:"2025-10-29"}, {esp:"malviz", fecha:"2025-10-31"},
   {esp:"malviz", fecha:"2025-11-01"}, {esp:"malviz", fecha:"2025-11-07"}, {esp:"malviz", fecha:"2026-10-15"},
 ];
-const CLAVE_H = "pasa_hist_v15"; // sube el número cuando cambien las reglas, para recalcular tus días
+const CLAVE_H = "pasa_hist_v17"; // sube el número cuando cambien las reglas, para recalcular tus días
 let DATOS = guardado(CLAVE_H, {});
 const kH = x => x.esp + "|" + x.fecha;
 const ESTRELLAS = new Set(["becada|2019-11-20","becada|2020-11-24","becada|2021-11-22","paloma|2024-10-21","malviz|2025-10-29","malviz|2024-11-01"]);
